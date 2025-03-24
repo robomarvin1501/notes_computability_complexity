@@ -1,0 +1,281 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 1}
+\author{Gidon Rosalki}
+\date{2025-03-23}
+
+
+\begin{document}
+\maketitle
+\section{Introduction to the course content}\label{sec:Introduction to the course content} % (fold)
+Some of these concepts will only be defined further in the course, since in
+order to learn them you need to complete the course. Such is life.
+
+Definitions: A clicker is a collection of nodes in a graph where there is an
+edge between every pair of nodes.
+
+Computational tasks: Examples \begin{enumerate}
+    \item To sort a given array. We saw in DAST that this can be done in $O
+        \left(n \log \left(n\right)\right)$
+    \item Given a graph $G$, with 2 points $s, t$, find a shortest path from
+        $s$ to $t$. We can do this in $O \left(n^4\right)$ (possibly better as
+        seen in DAST, but this is useful for comparison to the next problem)
+    \item Given a graph $G$ what is the largest clicker in the graph. $O
+        \left(2^n \cdot n^2\right)$ We know not an algorithm that solves this in
+        less than exponential time.
+    \item Given a program in python, establish whether or not the program will
+        stop. There is no solution to this problem (Google halting problem).
+\end{enumerate}
+Above is examples with respect to complexity and computation. Models are useful,
+for example let us consider sorting an array. In DAST we used the comparison
+model, and as a result had a lower bound for sorting arrays in $O \left(n \log
+\left(n\right)\right)$. In the macaroni model (collect the macaroni in your
+hand, push them against a flat surface with your other hand until you've reached
+the height of the longest, remove it, and repeat), we may sort the array in $O
+\left(n\right)$
+
+% section Introduction to the course content (end)
+
+\section{Computational problem}\label{sec:Computational problem} % (fold)
+\begin{definition}[Alphabet]
+    The finite non empty set $\Sigma$, or sometimes $\Gamma$
+\end{definition}
+
+\begin{definition}[Word]
+    A word on $\Sigma$ is a finite string of letters from $\Sigma$. A word
+    without any letters is still correct, and is $\varepsilon$.
+\end{definition}
+
+\begin{definition}[Computational problem]
+    An input $\Sigma$, an output $\Gamma$ (can be, but doesn't need to be the
+    same alphabet), and a function that finds for every input (word over
+    $\Sigma$), the correct output words for the input (some set of output
+    words)
+\end{definition}
+
+\subsection{Decision problems}\label{sec:Decision problems} % (fold)
+These are computation problems where the output alphabet is of the type $\Gamma
+= \left\{T, F\right\}$, and where the input of the problem is matched to the set
+of legal outputs that only contains one word, of length 1.
+
+\begin{example}[Decision]
+    Given a graph $G$, and the nodes $s, t$, and a number $k$, return $T$ if
+    there is a path of length $\leq k$ from $s$ to $t$ in $G$
+\end{example}
+% subsection Decision problems (end)
+
+\subsection{We will prove}\label{sec:We will prove} % (fold)
+\begin{itemize}
+    \item There is no python program that solves the stopping problem.
+    \item There is no realistic computational model that solves the stopping
+        problem.
+    \item There are some decision problems that are not solvable through python
+        programs (python programs are not defined, nor will they be defined, as
+        it is beyond the scope)
+\end{itemize}
+% subsection We will prove (end)
+
+\begin{definition}[Language]
+    A set of words
+\end{definition}
+
+\subsubsection{Clarification}\label{sec:Clarification} % (fold)
+There is a natural one to one and on matching between decision problems over $\Sigma$
+and languages over $\Sigma$. We will match to the decision problem defined over
+$f$ the language $L_f$, which contains the words over $\Sigma$ for which $f$
+returns true.
+% subsubsection Clarification (end)
+
+\subsubsection{Counting}\label{sec:Counting} % (fold)
+Given $\Sigma$, the number of words of length $k$ over $\Sigma$ is
+$1 \leq \left|\Sigma\right|^k < \aleph_0$. \\
+The number of words of every length over $\Sigma$ is $\aleph_0$. \\
+The number of languages over $\Sigma$ is $2^{\aleph_0} = \aleph > \aleph_0$. \\
+% subsubsection Counting (end)
+
+There are $\aleph_0$ different python programs (python is a language, so it is
+just an ordering of letters, each program is a single word). There are $\aleph$
+decision problems over $\Sigma = \left\{a, b\right\}$ or any other alphabet you
+may want. Since  $\aleph > \aleph_0$, there are too many decision problems, and
+there exists decision problems over $\Sigma = \left\{a, b\right\}$ that do not
+have solutions in python programs. This is a decidedly uninteresting thing to
+know, since there are more decision problems than we can define.
+% section Computational problem (end)
+
+\section{Toy model}\label{sec:Toy model} % (fold)
+\subsection{Deterministic Finite Automaton (DFA)}\label{sub:Deterministic Finite Automaton (DFA)} % (fold)
+\includegraphics{lecture_1_state_machine} \\
+The automaton has a finite number of states, which are shown in this diagram at
+the window $q$. We press $S$ to start, and the window shows $q_0$. When we press
+the right arrow, it uses the current letter from the input word to move to the
+next state $q_1$. Let us consider the input word $aba$.
+\begin{enumerate}
+    \item $a \to q_1$
+    \item $b \to q_2$
+    \item $a \to q_3$
+\end{enumerate}
+All these states $q_i$ may be equivalent, they are numbered differently for ease
+of communication. The state of the automaton will dictate whether the light is
+lit or not to indicate $T, F$ respectively.
+
+\subsubsection{Example}\label{sec:Example} % (fold)
+$\Sigma = \left\{a, b\right\}$. Our decision problem will be we accept a word
+$w \Leftrightarrow \#_a(w) = 1 \mod 3$, which is to say the number of $a$'s in the
+word is $1 \mod 3$. So $a$, $abaaa$, and $bbbba$ are all correct words, but
+$ababab$ is not. The respective language is $L = \left\{w \subseteq \Sigma^n\
+\forall n \in \N : \#_a \left(w\right) = 1 \mod 3 \right\}$. \\
+The concept: For $i = 0, 1, 2$ there will be the state in the automaton
+$q_i$. When there are $i$ instances of $a \mod 3$, the automaton will arrive at
+the state $q_i$. \\
+We will represent the automaton as a graph, and each node is a state of the
+graph. \\
+
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, accepting, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+
+        \draw   (q0) edge[loop above] node{b} (q0)
+                (q0) edge[->, above] node{a} (q1)
+                (q1) edge[loop above] node{b} (q1)
+                (q1) edge[->, above] node{a} (q2)
+                (q2) edge[loop above] node{b} (q2)
+                (q2) edge[->, bend left, below] node{a} (q0);
+    \end{tikzpicture} \\
+\end{center}
+
+Let us call $L \left(A\right)$ the collection of words that the automaton
+receives. We can now ask if this is a correct solution by asking $L
+\left(A\right) = L$. If so, we say that the automaton \textbf{decides} $L$.
+
+\begin{theorem}[]
+    $L \left(A\right) = L$
+
+    \begin{proof}[Proof ]
+        We will show that for every word $w$ which has $1 mod 3$ $a$'s within,
+        the automaton will reach the wanted state. We will prove this by
+        induction on the length of the word $w$. \\
+        Basis: $n = 0$: For $w = \varepsilon$ the automaton begins and ends in
+        the starting state, which is $q_0$, as is needed. \\
+        Inductive assumption: we will assume it holds for $n$ \\
+        Inductive step: We will prove for $n + 1$. Let there be a word $w$ of
+        length $n + 1$, and we will write $w = w'\alpha$, where $w'$ is a word
+        of length $n$, and $\alpha \in \left\{a, b\right\}$. Since $w'$ is of
+        length $n$, the automaton reaches state $q_i$ where $i = \#_a
+        \left(w'\right) \mod 3$. If $\alpha = b$, then the automaton will remain
+        at $q_i$, which is suitable for the theorem. If $\alpha = a$, then the
+        automaton will move from $q_i$ to $q_j$ where $j = i + 1 \left(\mod 3\right)$, and
+        indeed $\#_a \left(w\right) = i + 1 \left(\mod 3\right)$. We have thus
+        proven the inductive step, and have proven the theorem.
+    \end{proof}
+\end{theorem}
+
+\begin{example}[]
+    $\Sigma = \left\{0, 1\right\},\ L_b = \left\{w \subseteq \Sigma^n\ \forall n
+    \in \N : \left(w\right)_2 = 1 \left(\mod 3\right)\right\}$, where
+    $\left(w\right)_2$ is a binary number. So $110 \notin L_b,\ 0111 \in L_b,\
+    10000 \in L_b$. \\
+    \begin{proof}[Solution ]
+        When running the word $w$ the automaton will reach the situation $q_i$
+        when $i = \left(w\right)_2 \left(\mod 3\right)$. For example $110 \to
+        q_0$ \\
+
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, accepting, right of=q0] (q1) {$q_1$};
+                \node[state, right of=q1] (q2) {$q_2$};
+
+                \draw   (q0) edge[loop above] node{0} (q0)
+                        (q0) edge[->, bend left, above] node{1} (q1)
+                        (q1) edge[->, bend left, below] node{1} (q0)
+                        (q1) edge[->, bend left, above] node{0} (q2)
+                        (q2) edge[->, bend left, below] node{0} (q1)
+                        (q2) edge[loop above] node{1} (q2);
+            \end{tikzpicture} \\
+        \end{center}
+
+        The induction to prove this is incredibly similar to the previous
+        example, and is left as an exercise for the reader.
+    \end{proof}
+\end{example}
+This can grant us solutions in number theory, for example this shows us that the
+number $\left(101111...1110\right)_2 = 1 \left(\mod 3\right)$, where there are
+$n$ $1$'s in the middle. This comes from the correctness of the state machine.
+% subsubsection Example (end)
+
+% subsection Deterministic Finite Automaton (DFA) (end)
+
+\subsubsection{Questions on state machines}\label{sec:Questions on state machines} % (fold)
+\begin{enumerate}
+    \item Is it possible to find the binary representation of prime numbers?
+    \item Is there a general simple characterisation for the collection of
+        decision problems with automata
+    \item Can we decide $L$ or $L'$ through a DFA? What about $L \cap L'$? $L
+        \cup L'$? $\overline{L}$?
+\end{enumerate}
+% subsubsection Questions on state machines (end)
+
+\begin{definition}[DFA]
+    $A$ is a vector of 5 things: $A = \left(\Sigma, Q, q_0, F, \delta\right)$
+    where \begin{itemize}
+        \item $\Sigma$ is an alphabet
+        \item $Q$ is the non empty finite set of states
+        \item $q_0 \in Q$ is the starting state
+        \item $F \subseteq Q$ is the set of accepted finishing states
+        \item $\delta$ is the transition function $\delta: Q \times \Sigma \to Q$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[]
+    The running of an automaton $A$ on the word $w = \alpha_1 \alpha_2 \dots
+    \alpha_n$ is the series of states $q_0, q_1, \dots, q_n$, which enables:
+    \begin{itemize}
+        \item $q_0$ is the starting state
+        \item $q_i = \delta \left(q_{i - 1}, \alpha_i\right)$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[The extended transition function of $A$]
+    $\delta^* \left(q_0, w\right) = q_n$
+\end{definition}
+
+So this allows us to write $L \left(A\right) = \left\{w over \Sigma : \delta^*
+\left(q_t, w\right) \in F\right\}$
+% section Toy model (end)
+
+
+\end{document}
