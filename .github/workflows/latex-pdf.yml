@@ -3,7 +3,7 @@ name: Compile LaTeX to PDF
 on:
   push:
     branches:
-      - master  # Adjust this if you use a different branch
+      - master  # Adjust if needed
 
 jobs:
   build:
@@ -17,14 +17,22 @@ jobs:
 
       - name: Compile LaTeX files
         run: |
-          mkdir -p pdfs
+          mkdir -p public
           for file in *.latex; do
-            lualatex -interaction=nonstopmode -output-directory=pdfs "$file"
+            lualatex -interaction=nonstopmode -output-directory=public "$file"
           done
 
-      - name: Upload PDFs as artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload PDFs to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: compiled-pdfs
-          path: pdfs
+          path: public
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
