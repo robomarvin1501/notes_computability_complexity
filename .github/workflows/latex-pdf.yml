@@ -1,0 +1,30 @@
+name: Compile LaTeX to PDF
+
+on:
+  push:
+    branches:
+      - master  # Adjust this if you use a different branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install LaTeX
+        run: sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended texlive-lang-english texlive-luatex
+
+      - name: Compile LaTeX files
+        run: |
+          mkdir -p pdfs
+          for file in *.latex; do
+            lualatex -interaction=nonstopmode -output-directory=pdfs "$file"
+          done
+
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-pdfs
+          path: pdfs
+
