@@ -27,19 +27,47 @@ jobs:
 
       - name: Generate index.html
         run: |
-          echo "<html><head>
-            <title>Lecture Notes</title>
-            <style>
-              body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-              h1 { color: #333; }
-              ul { list-style-type: none; padding: 0; }
-              li { margin: 10px 0; }
-              a { text-decoration: none; color: #007bff; font-size: 18px; }
-              a:hover { text-decoration: underline; }
-            </style>
-          </head><body>
-            <h1>Lecture Notes</h1>
-            <ul>" > public/index.html
+          echo "<html>
+          <head>
+              <title>Lecture Notes</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      text-align: center;
+                      padding: 20px;
+                      background-color: #121212;
+                      color: #e0e0e0;
+                  }
+
+                  h1 {
+                      color: #d7d4cf;
+                  }
+
+                  ul {
+                      list-style-type: none;
+                      padding: 0;
+                  }
+
+                  li {
+                      margin: 10px 0;
+                  }
+
+                  a {
+                      text-decoration: none;
+                      color: #64b5f6;
+                      font-size: 18px;
+                      transition: color 0.2s;
+                  }
+
+                  a:hover {
+                      color: #bbdefb;
+                      text-decoration: underline;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Lecture Notes</h1>
+              <ul>" > public/index.html
           for file in public/*.pdf; do
             filename=$(basename "$file")
             echo "<li><a href='$filename'>$filename</a></li>" >> public/index.html
