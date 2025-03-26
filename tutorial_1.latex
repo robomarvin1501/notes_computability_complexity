@@ -1,0 +1,343 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 1}
+\author{Gidon Rosalki}
+\date{2025-03-26}
+
+
+\begin{document}
+\maketitle
+Given a python program that sorts lists, can you write another program that
+verifies whether or not the sorter will always return correctly sorted lists? In
+fact we can write a program such as this. \\
+Given a map, can you colour in each country in one of 3 colours, such that no 2
+countries of the same colour share a border? This is an open question, and
+solving it will get you 100 on the course. Note, this is also proving that P=NP,
+and will also get you $\$1,000,000$ \\
+
+\section{Deterministic Finite Automata}\label{sec:Deterministic Finite Automata} % (fold)
+Consider the following DFA:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, accepting, above right of=q0] (q1) {$q_1$};
+        \node[state, below right of=q0] (q2) {$q_2$};
+
+        \draw   (q0) edge[->, above] node{a} (q1)
+                (q0) edge[->, below] node{b} (q2)
+                (q1) edge[loop right] node{a,b} (q1)
+                (q2) edge[loop right] node{a,b} (q2);
+    \end{tikzpicture} \\
+\end{center}
+If we run this on $abb$, we start by moving to $q_1$, and staying there, and
+therefore the word is accepted. If we try on $b$, or $\varepsilon$ then neighter
+is accepted. Let's try another machine:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, accepting, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[loop above] node{b} (q0)
+                (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[loop above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0);
+    \end{tikzpicture} \\
+\end{center}
+Here we can see that $aba$ is accepted. In fact, this automaton accepts all words
+that finish with $a$. \\
+Let us make an automaton that accepts all words that contain $aa$. We want it to
+remember if $aa$ has ever appeared, and shall achieve this by detecting an $a$,
+and then another $a$ as follows: \begin{itemize}
+    \item $q_0$ is the words that do not contain $aa$, and do not finish in $a$
+    \item $q_1$ is the words that do not contain $aa$, and finish in $a$
+    \item $q_2$ is the words that contain $aa$
+\end{itemize}
+In order to prove the correctness of the automaton, we will need to prove the
+above theorems. To prove this we induct on word length.
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, accepting, right of=q1] (q2) {$q_2$};
+
+        \draw   (q0) edge[loop above] node{b} (q0)
+                (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                (q1) edge[->, above] node{a} (q2)
+                (q2) edge[loop above] node{a,b} (q2);
+    \end{tikzpicture} \\
+\end{center}
+% section Deterministic Finite Automata (end)
+
+\section{Definitions}\label{sec:Definitions} % (fold)
+\subsection{Languages}\label{sub:Languages} % (fold)
+\begin{definition}[$\Sigma$ - \textbf{alphabet}]
+    The \textbf{alphabet}, written as $\Sigma$ is a finite non empty set. Its
+    elements are called \textbf{letters}. \\
+\end{definition}
+
+$\Sigma = \left\{a, b\right\}$, then for all $n \in \N$, \[
+    \Sigma^n := \left\{\left(\sigma_1, \dots, \sigma_n\right) : \sigma_1, \dots,
+    \sigma_n \in \Sigma\right\}
+\]
+and \[
+    \Sigma^0 = \left\{\varepsilon\right\}
+\]
+the empty sequence. \\
+
+\begin{definition}[$\Sigma^*$]
+    \[
+        \Sigma^* := \displaystyle\bigcup_{n = 0}^{\infty}\Sigma^n
+    \]
+\end{definition}
+
+\begin{definition}[Language]
+    A language $L$ over the alphabet $\Sigma$ is $L \subseteq \Sigma^*$, also
+    known as a set of words.
+\end{definition}
+
+So, given those definitions, \begin{itemize}
+    \item $L_1 = \left\{ab, a, \varepsilon, bbb\right\}$ is a finite language
+    \item $L_2 = \left\{w \in \Sigma^* : w starts with a\right\}$ is an infinite
+        language
+    \item $L_3 = ssbrw \in \Sigma^* : |w| < 24$ is a finite language
+\end{itemize}
+% subsection Languages (end)
+\subsection{DFA}\label{sub:DFA} % (fold)
+\begin{definition}[DFA]
+    The DFA $A$ is a vector of 5 things: $A = \left(\Sigma, Q, q_0, F, \delta\right)$
+    where \begin{itemize}
+        \item $\Sigma$ is an alphabet
+        \item $Q$ is the non empty finite set of states
+        \item $q_0 \in Q$ is the starting state
+        \item $F \subseteq Q$ is the set of accepted finishing states
+        \item $\delta$ is the transition function $\delta: Q \times \Sigma \to Q$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Running a DFA on a word]
+    Given $w = w_1 \dots w_n \in \Sigma^*$, a running of $A$ on $w$ is $r_1,
+    r_1, \dots, r_n \in Q$ such that
+    \begin{itemize}
+        \item $r_0 = q_0$
+        \item $\forall 0 \leq i < n,\ r_{i + 1} = \delta \left(r_i, w_{i + 1}\right)$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Acceptance]
+    We will say that the DFA $A$ \textbf{accepts} $w$ \textbf{if and only if}
+    $r_n \in F$
+\end{definition}
+
+\begin{definition}[DFA language]
+   The language of the DFA is the set of accepted words: \[
+       L \left(A\right) = \left\{w \in \Sigma^* : A \text{ accepts }  w\right\}
+    \]
+\end{definition}
+
+For the first DFA example we did, we may formally define it as follows: \begin{itemize}
+    \item $\Sigma = \left\{a, b\right\}$
+    \item $Q = \left\{q_0, q_1\right\}$
+    \item $F = \left\{q_1\right\}$
+    \item The initial state is $q_0$
+    \item $\delta$ is
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+         & $a$ & $b$ \\ \hline
+        $q_0$ & $q_1$ & $q_2$ \\ \hline
+        $q_1$ & $q_1$ & $q_1$ \\ \hline
+        $q_2$ & $q_2$ & $q_2$ \\ \hline
+    \end{tabular}
+    \caption{$\delta$}
+\end{table}
+\end{itemize}
+% subsection DFA (end)
+% section Definitions (end)
+
+\section{Formally proving what is the language of a DFA}\label{sec:Formally proving what is the language of a DFA} % (fold)
+Consider the DFA
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, accepting, above right of=q0] (q1) {$q_1$};
+        \node[state, below right of=q0] (q2) {$q_2$};
+
+        \draw   (q0) edge[->, above] node{a} (q1)
+                (q0) edge[->, below] node{b} (q2)
+                (q1) edge[loop right] node{a,b} (q1)
+                (q2) edge[loop right] node{a,b} (q2);
+    \end{tikzpicture} \\
+\end{center}
+In the words of the formal tutorial, we need to know how to prove its language,
+and an DFA's language, at gunpoint. I suspect that this is a threat, and that
+the midterm exam is going to be... Intense.
+\begin{theorem}[]
+    \[ L \left(A\right) = L \]
+    \begin{proof}[Proof ]
+        We will want to prove that the words that finish their runs at each
+        situation are as follows
+        $x$ are: \begin{enumerate}
+            \item $q_0$ - The empty word
+            \item $q_1$ - Words that start with $a$
+            \item $q_2$ - Words that do not start with $a$, and are not the
+                empty word
+        \end{enumerate}
+        This is sufficient since \begin{align*}
+            w \in L &\Leftrightarrow w \text{ starts with } a \\
+                    &\Leftrightarrow \text{The running of $w$ finishes at $q_1$}
+                    \\
+                    &\Leftrightarrow A \text{ accepts } w \\
+                    &\Leftrightarrow w \in L \left(A\right) \\
+        \end{align*}
+        We will prove by induction on the length of $w$: \\
+        Basis: $|w| = 0 \implies w = \varepsilon \implies$ the final state is
+        $q_0$, as required \\
+        Inductive hypothesis: Let there be $w : |w| = n$, then the above
+        requirements hold. \\
+        Inductive step: Let there be $w : |w| = n + 1,\ w = w'\sigma,\ |w'| = n,
+        \sigma \in \Sigma$. We will split into situations, according to the state
+        in which $A$ finishes $w'$ \begin{enumerate}
+            \item $q_0 \implies w' = \varepsilon \implies w = \sigma$. We will
+                split into situations by $\sigma$. If $\sigma = a \implies w =
+                a$ and so we want the run to finish at $q_1$, and indeed from
+                the definition $\delta \left(q_0, a\right) = q_1$. \\
+                If $\sigma = b$, then similarly to $\sigma = a$
+            \item $q_1 \implies w'$ starts with $a$ (from the induction
+                hypothesis). Therefore, from the definition, $\forall \sigma \in
+                \Sigma,\ \delta \left(q_1, \sigma\right) = q_1$
+            \item $q_2$ exactly like the previous.
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+% section Formally proving what is the language of a DFA (end)
+
+\section{The extended transition function}\label{sec:The extended transition function} % (fold)
+We write the extended transition function as $\delta^*$. We defined earlier that
+$\delta: Q \times \Sigma \to Q$, and we will similarly define $\delta^*: Q
+\times \Sigma^* \to Q$ where \begin{align*}
+    \forall q \in Q,\ w \in \Sigma^*,\ \delta^* \left(q, w\right) = \begin{cases}
+        q, &\text{ if }w=\varepsilon\\
+        \delta \left(\delta^* \left(q, w'\right), \sigma\right), &\text{ if
+        }w=w'\sigma\\
+    \end{cases}
+\end{align*}
+
+\begin{theorem}[]
+    For all $q \in Q$ and $w,w' \in \Sigma^*$, it is true that \begin{align*}
+        \delta^* \left(q, w \cdot w'\right) &= \delta^* \left(\delta^* \left(q,
+        w\right), w'\right)
+    \end{align*}
+
+    \begin{proof}[Proof ]
+        By induction on $\left|w'\right|$: \\
+        Basis: $\left|w'\right| = 0$: \begin{align*}
+            \delta^* \left(q, w \cdot w'\right) &= \delta^* \left(q, w \cdot \varepsilon
+            \right) \\
+                                                &= \delta^* \left(q, w\right) \\
+                                                &= \delta \left(\delta^*
+                                                \left(q, w\right),
+                                            \varepsilon\right) \\
+                                                &= \delta^* \left(\delta^*
+                                                \left(q, w\right), w'\right)
+        \end{align*}
+        Step: We will assume for $\left|w\right| = n$, and prove for
+        $\left|w'\right| = n + 1$. Note that $w' = w'' \sigma,\ \left|w''\right|
+        = n, \sigma \in \Sigma$: \begin{align*}
+            \delta^* \left(q, w \cdot w'\right) &= \delta^* \left(q, w \cdot
+            w'' \cdot \sigma\right) \\
+                                \text{Definition of } \delta^*\ &= \delta \left(\delta^* \left(q
+                                                w \cdot w''\right),
+                                            \sigma\right) \\
+                               \text{Inductive hypothesis } &= \delta
+                               \left(\delta^* \left(\delta^* \left(q, w\right),
+                               w''\right), \sigma\right) \\
+                             \text{Definition of } \delta^*\ &= \delta^*
+                                                            \left(\delta^*
+                                                            \left(q, w\right),
+                                                        w'' \sigma\right) \\
+                                                             &= \delta^*
+                                                             \left(\delta^*
+                                                             \left(q, w\right),
+                                                         w'\right)
+        \end{align*}
+    \end{proof}
+\end{theorem}
+% section The extended transition function (end)
+
+\section{Regularity of Leven}\label{sec:Regularity of Leven} % (fold)
+\subsection{Regular languages}\label{sub:Regular languages} % (fold)
+\begin{definition}[]
+    $L$ is a regular language if there exists a DFA $A$ that decides it. The
+    collection of regular languages is called REG \[
+        REG \stackrel{def}{=} \left\{L \subseteq \Sigma^* : \exists A : L
+        \left(A\right) = L \right\}
+    \]
+\end{definition}
+
+We will define $L_{EVEN} = \left\{w \in L : \left|w\right| \mod 2 = 0\right\}$.
+Is $L_{EVEN}$ also regular? Yes, in fact it is.
+% subsection Regular languages (end)
+\subsection{Intuition}\label{sub:Intuition} % (fold)
+$L$ is regular $\implies$ there exists $A = \left(Q, \Sigma, \delta, q_0,
+F\right)$ such that $L \left(A\right) = L$. We want to build an automaton $A' =
+\left(Q', \Sigma, \delta', q_0', F'\right)$ such that $L \left(A\right) =
+L_{EVEN}$
+% subsection Intuition (end)
+
+\subsection{Proof (sketch)}\label{sub:Proof (sketch)} % (fold)
+Let $A = \left(Q, \Sigma, \delta, q_0, F\right)$ be a DFA that decides $L$. In
+order to construct a DFA for $L_{EVEN}$, we can define a new automaton that
+tracks both the state of $A$, and tracks if the number of bits in the input
+string so far is positive or negative. We can do this by defining $A' =
+\left(Q', \Sigma, \delta', \left(q_0, 0\right), F'\right)$ where
+\begin{itemize}
+    \item $Q' = Q \times \left\{0, 1\right\}$, where the second number tracks
+        if the number of input bits so far is odd or even
+    \item $ \forall q \in Q,\ p \in \left\{0, 1\right\},\ a \in Sigma,\ \delta' \left(\left(q, p\right), a\right) = \left(\delta \left(q,
+        a\right), 1 - p\right)$
+    \item The initial state is $\left(q_0, 0\right)$
+    \item $F' = \left\{\left(q, 0\right) : q \in F\right\}$, which is all the
+        accepting states of the original automaton, but ensuring htat they have
+        an even number of bits.
+\end{itemize}
+
+Since $A'$ is a DFA, then the language it accepts $L_{EVEN}$ is regular.
+% subsection Proof (sketch) (end)
+
+% section Regularity of Leven (end)
+
+\end{document}
