@@ -64,6 +64,9 @@ jobs:
                       text-decoration: underline;
                   }
               </style>
+              <!-- Cloudflare Web Analytics -->
+              <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d21d8bf953444260923f9acabf4f3535"}'></script>
+              <!-- End Cloudflare Web Analytics -->
           </head>
           <body>
               <h1>Lecture Notes</h1>
