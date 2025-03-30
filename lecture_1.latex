@@ -179,7 +179,7 @@ graph. \\
 
 Let us call $L \left(A\right)$ the collection of words that the automaton
 receives. We can now ask if this is a correct solution by asking $L
-\left(A\right) = L$. If so, we say that the automaton \textbf{decides} $L$.
+\left(A\right) = L$. If so, we say that the automaton \textbf{determines} $L$.
 
 \begin{theorem}[]
     $L \left(A\right) = L$
@@ -244,7 +244,7 @@ $n$ $1$'s in the middle. This comes from the correctness of the state machine.
     \item Is it possible to find the binary representation of prime numbers?
     \item Is there a general simple characterisation for the collection of
         decision problems with automata?
-    \item Can we decide $L$ or $L'$ through a DFA? What about $L \cap L'$? $L
+    \item Can we determine $L$ or $L'$ through a DFA? What about $L \cap L'$? $L
         \cup L'$? $\overline{L}$?
 \end{enumerate}
 % subsubsection Questions on state machines (end)

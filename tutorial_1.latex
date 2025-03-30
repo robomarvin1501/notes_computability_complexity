@@ -62,7 +62,7 @@ Consider the following DFA:
     \end{tikzpicture} \\
 \end{center}
 If we run this on $abb$, we start by moving to $q_1$, and staying there, and
-therefore the word is accepted. If we try on $b$, or $\varepsilon$ then neighter
+therefore the word is accepted. If we try on $b$, or $\varepsilon$ then neither
 is accepted. Let's try another machine:
 \begin{center}
     \begin{tikzpicture}[node distance=3cm]
@@ -301,7 +301,7 @@ $\delta: Q \times \Sigma \to Q$, and we will similarly define $\delta^*: Q
 \section{Regularity of Leven}\label{sec:Regularity of Leven} % (fold)
 \subsection{Regular languages}\label{sub:Regular languages} % (fold)
 \begin{definition}[]
-    $L$ is a regular language if there exists a DFA $A$ that decides it. The
+    $L$ is a regular language if there exists a DFA $A$ that determines it. The
     collection of regular languages is called REG \[
         REG \stackrel{def}{=} \left\{L \subseteq \Sigma^* : \exists A : L
         \left(A\right) = L \right\}
@@ -319,7 +319,7 @@ L_{EVEN}$
 % subsection Intuition (end)
 
 \subsection{Proof (sketch)}\label{sub:Proof (sketch)} % (fold)
-Let $A = \left(Q, \Sigma, \delta, q_0, F\right)$ be a DFA that decides $L$. In
+Let $A = \left(Q, \Sigma, \delta, q_0, F\right)$ be a DFA that determines $L$. In
 order to construct a DFA for $L_{EVEN}$, we can define a new automaton that
 tracks both the state of $A$, and tracks if the number of bits in the input
 string so far is positive or negative. We can do this by defining $A' =
