@@ -1,0 +1,235 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 2}
+\author{Gidon Rosalki}
+\date{2025-03-30}
+
+
+\begin{document}
+\maketitle
+\section{Reminder}\label{sec:Reminder} % (fold)
+$\Sigma$ - the alphabet we may use, $\Sigma^*$ all the words of the alphabet
+$\Sigma$. A \textbf{language} on $\Sigma$: $L \subseteq \Sigma^*$. A DFA =
+$\left(\Sigma, Q, q_0, F, \delta\right)$. $L \left(A\right) \subseteq \Sigma^*$
+is the collection of words that $A$ accepts. We say that $A$ \textbf{determines}
+the language $L \left(A\right)$. $L = L \left(A\right), \exists A \implies L$ is
+regular. $REG$ is the collection of all the regular languages. Something to note
+is that most of the languages are not in $REG$. Note that $L_1, L_2 \in REG
+\implies \overline{L_1}, L_1 \cap L_2, L_1 \cup L_2 \in REG$
+
+Given an automaton $A = \left(\Sigma, Q, q_0, F, \delta\right)$, what is the
+meaning $\delta \left(q, \alpha\right)$? It represents the state to which we
+will move from $q$ when we call the letter $\alpha$. Let us define the word $w =
+w' \alpha$: \begin{align*}
+    \delta^* \left(q, w\right) &= \delta \left(\delta^* \left(q, w'\right),
+    \alpha\right) \\
+        \delta^* \left(q, \varepsilon\right) &= q \\
+\end{align*}
+So $\delta^* \left(q, w\right)$ is the state to which we will arrive if we begin
+at $q$, and move over all the letters of $w$. It is important to note that an
+automaton only defines $\delta$, and $\delta$ defines $\delta^*$. We may now
+write that \[
+    L \left(A\right) = \left\{w \in \Sigma^* : \delta^* \left(q_0, w\right) \in
+    F\right\}
+\]
+% section Reminder (end)
+
+\begin{theorem}[] $L_1, L_2 \in REG \implies L_1 \cup L_2 \in REG$ \\ $L_1, L_2 \in REG \implies L_1 \cap L_2 \in REG$
+    \begin{proof}[Proof ] Without loss of generality, we may assume that $L_1$ and $L_2$ are on the same alphabet
+        $\Sigma$. How can this bee without loss of generality? If $L_1 \subseteq \Sigma_1^*$ and $L_2 \subseteq
+        \Sigma_2^*$, then we may take $\Sigma = \Sigma_1 \cup \Sigma_2$, and add a state called sink to the DFAs, such
+        that there are no letters that leave the sink, and all the new letters not dealt with by the original DFA send
+        to the sink. \\
+        Let there be $A = \left(\Sigma, Q, q_0, F, \delta\right)$, such that $L \left(A\right)= L_1$,
+        and $B = \left(\Sigma, P, p_0, G, \eta\right)$, such that $L \left(B\right) = L_2$. \\
+        The concept is that we
+        will build an automaton with the set of states $Q \times P$. The word $w$ will reach that state $\left(\delta^*
+            \left(q_0, w\right), \eta^* \left(p_0, w\right)\right)$. \\
+        Given that the concept works, the automaton that
+            we will build is \[ C = \left(\Sigma, Q \times P, \left(q_0, p_0\right), \left(F \times P\right) \cup
+                \left(Q \times G\right), \xi\right) \] and if we're proving intersection then \[ C = \left(\Sigma, Q
+        \times P, \left(q_0, p_0\right), F \times G, \xi\right) \]
+
+        It is sufficient to prove that the concept is true in order to finish. When $\xi$ is defined by \[ \xi
+            \left(\left(q, p\right), \alpha\right) = \left(\delta \left(q, \alpha\right), \eta \left(p,
+            \alpha\right)\right) \] We will finish by showing that for every word $w$ it is true that \[ \xi^*
+            \left(\left(q_0, p_0\right), w\right) = \left(\delta^* \left(q_0, w\right), \eta^* \left(p_0,
+            w\right)\right) \] We will prove this by induction on $\left|w\right| = n$. \\
+            Basis $n = 0$: In this case
+            $w = \varepsilon$.
+            \begin{align*}
+                \xi^* \left(\left(q_0, p_0\right), \varepsilon\right) &= \left(q_0,
+            p_0\right) \\
+                                  &= \left(\delta^* \left(q_0,\varepsilon\right), \eta^* \left(p_0, \varepsilon\right)\right)
+        \end{align*}
+        Step $n \to n + 1$: Given $w$ of length $n + 1$, we will write $w = w' \alpha$.
+        \begin{align*}
+            \xi^* \left(\left(q_0, p_0\right), w'\alpha\right) &\stackrel{def}{=} \xi \left(\xi^* \left(\left(q_0, p_0\right),
+            w'\right), \alpha\right) \\
+               \text{Induction hypothesis} &= \xi \left(\left(\delta^* \left(q_0, w'\right), \eta^*
+                               \left(p_0, w'\right)\right), \alpha\right) \\
+                               &\stackrel{def}{=} \left(\delta \left(\delta^* \left(q_0, w'\right), \alpha\right), \eta
+                               \left(\eta^* \left(p_0, w'\right), \alpha\right)\right) \\
+                               &\stackrel{def}{=} \left(\delta^* \left(q_0, w'\alpha\right), \eta^* \left(p_0,
+                               w'\alpha\right)\right) \\
+                               &= \left(\delta^* \left(q_0, w\right), \eta^* \left(p_0, w\right)\right) \\
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+If $L_1, L_2$ are languages on $\Sigma$, then \[
+    L_1 \cdot L_2 = \left\{w \cdot z : w \in L_1 \land z \in L_2\right\}
+\]
+For example, if $L_1 = \left\{aa, ab\right\}, L_2 = \left\{ab, ac\right\}$, then \[
+    \left\{abac, aaab, abab\right\} \subseteq L_1 \cdot L_2
+\]
+We will also define \begin{align*}
+    L_1^k &= L_1 \cdot L_1 \cdot \dots \cdot L_1 \\
+    L_1^0 &= \left\{\varepsilon\right\} \\
+    L^m \cdot L^k &= L^{m + k} \\
+    L \cdot \emptyset &= \emptyset \\
+    L^* &= \displaystyle\bigcup_{k = 0}^{\infty}L^k \\
+\end{align*}
+The final line is called the Kleene closure of $L$.
+
+\subsubsection{Examples}\label{sec:Examples} % (fold)
+\begin{align*}
+    L = \left\{a^n : n \geq 0 \land 2 \mid n\right\}  &\implies L^* = L \\
+    L = \left\{a\right\} &\implies L^* = \left\{a^n : n \geq 0\right\} \\
+    L = \left\{a, b\right\} &\implies L^* = \left\{a, b\right\}^* \\
+\end{align*}
+% subsubsection Examples (end)
+
+\begin{theorem}[]
+    \begin{enumerate}
+        \item $\emptyset, \left\{\varepsilon\right\}, \left\{a\right\} \in REG$, which is to say, languages of size 1,
+            or the empty language
+        \item $REG$ is closed to union, concatenation, and a Kleene closure
+        \item Every language in $REG$ may be built from languages of type $1$ through operation of type $2$
+    \end{enumerate}
+\end{theorem}
+
+\section{NFAs}\label{sec:NFAs} % (fold)
+In this section we will define \begin{enumerate}
+    \item Non-deterministic Finite Automaton
+    \item We will define NREG, all the languages that characterise NFAs
+    \item We will show that NREG is closed to concatenation and Kleene closures
+    \item We will show that NREG is equivalent to REG
+\end{enumerate}
+
+Given a word, the automaton has a set of runs that finish. The automaton $A$ accepts a word $w$ if there is a correct
+run on $A$ that finishes in the accepting state. \\
+Example: $L_1 = \left\{w \in \left\{a, b\right\} : w \text{ finishes with } aaa \lor aab\right\}$.
+
+The concept is that we will leave the starting state only on the third to last letter: \\
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+        \node[state, accepting, right of=q2] (q3) {$q_3$};
+
+        \draw   (q0) edge[loop above] node{a, b} (q0)
+                (q0) edge[->, above] node{a} (q1)
+                (q1) edge[->, above] node{a} (q2)
+                (q2) edge[->, above] node{a, b} (q3);
+    \end{tikzpicture} \\
+\end{center}
+
+Using the above NFA, on the word $abaab$, we may have the runs $q_0,q_0,q_0,q_0,q_0$, $q_0,q_1,x,x,x,x$,
+$q_0,q_0,q_0,q_1,q_2,q_3$, and of these 3, only the last run is accepted. Let us call this NFA $A$. We will say that $A$
+identifies $L \left(A\right)$, rather than determines, since it is non deterministic. \\
+
+Let there be $A, B$ to NFAs, such that $A$ identifies $L$, and $B$ identifies $L'$. We want to show that $L, L' \in
+NREG \implies L \cup L' \in NREG$. We can do this by simply pretending $A$ and $B$ to be the same automaton, all their
+start states are the new NFA's start states. If the word is located in one of the languages $L$ or $L'$, then the same
+run that identifies it in the original NFA will also identify it in our new NFA.
+
+\begin{example}[]
+    Given the language $L_2 = \left\{ababb\right\}$, write an NFA that identifies $L_2$
+    \begin{proof}[Solution]
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, right of=q0] (q1) {$q_1$};
+                \node[state, right of=q1] (q2) {$q_2$};
+                \node[state, right of=q2] (q3) {$q_3$};
+                \node[state, right of=q3] (q4) {$q_4$};
+                \node[state, accepting, right of=q4] (q5) {$q_5$};
+
+                \draw   (q0) edge[->, above] node{a} (q1)
+                        (q1) edge[->, above] node{b} (q2)
+                        (q2) edge[->, above] node{a} (q3)
+                        (q3) edge[->, above] node{b} (q4)
+                        (q4) edge[->, above] node{b} (q5);
+            \end{tikzpicture} \\
+        \end{center}
+    \end{proof}
+\end{example}
+
+\begin{example}[]
+    $L_3 = \left\{\text{All the words that may be made from} ababb \text{ by deleting some or all of the letters}
+    \right\}$. For example, $aa \in L_3$.
+    \begin{proof}[Solution]
+        To achieve this we will add the epsilon path to each of the nodes, which
+        allows us to start from any given node, and skip any given node:
+
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, right of=q0] (q1) {$q_1$};
+                \node[state, right of=q1] (q2) {$q_2$};
+                \node[state, right of=q2] (q3) {$q_3$};
+                \node[state, right of=q3] (q4) {$q_4$};
+                \node[state, accepting, right of=q4] (q5) {$q_5$};
+
+                \draw   (q0) edge[->, bend left, above] node{a} (q1)
+                        (q0) edge[->, bend right, above] node{$\varepsilon$} (q1)
+                        (q1) edge[->, bend left, above] node{a} (q2)
+                        (q1) edge[->, bend right, above] node{$\varepsilon$} (q2)
+                        (q2) edge[->, bend left, above] node{a} (q3)
+                        (q2) edge[->, bend right, above] node{$\varepsilon$} (q3)
+                        (q3) edge[->, bend left, above] node{a} (q4)
+                        (q3) edge[->, bend right, above] node{$\varepsilon$} (q4)
+                        (q4) edge[->, bend right, above] node{$\varepsilon$} (q5)
+                        (q4) edge[->, bend left, above] node{a} (q5);
+            \end{tikzpicture} \\
+        \end{center}
+
+    \end{proof}
+\end{example}
+% section NFAs (end)
+
+\end{document}
