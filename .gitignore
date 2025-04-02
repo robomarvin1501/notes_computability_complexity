@@ -1,3 +1,4 @@
 *.pdf
 Makefile
 venv/
+homework/

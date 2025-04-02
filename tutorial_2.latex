@@ -1,0 +1,344 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 2}
+\author{Gidon Rosalki}
+\date{2025-04-02}
+
+
+\begin{document}
+\maketitle
+\noindent\textbf{Notice:} If you find any mistakes, please open an issue at \href{https://github.com/robomarvin1501/notes\_computability\_complexity}{\texttt{https://github.com/robomarvin1501/notes\_computability\_complexity}}
+\section{Non-deterministic Finite Automaton (NFA)}\label{sec:Non-deterministic Finite Automaton}% (fold)
+
+\begin{definition}[NFA]
+    An NFA $A$ is defined as \[
+        A = \left(Q, \Sigma, \delta, Q_0, F\right)
+        \]
+    where \begin{itemize}
+        \item $\Sigma$ is the alphabet
+        \item $Q$ is a set of the states
+        \item $F \subseteq Q$
+        \item $Q_0 \subseteq Q$ the starting states
+        \item $\delta : Q \times \Sigma \to 2^Q$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Run]
+    A run of $A$ on $w = w_1 \dots w_n$ is a sequence of states $r_0, \dots, r_n \in Q$, such that \begin{itemize}
+        \item $r_0 \in Q$
+        \item $\forall 0 \leq i < n\ r_{i + 1} \in \delta \left(r_i, w_{i + 1}\right)$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Accepting run]
+    A run is called accepting if $r_n \in F$
+\end{definition}
+
+\begin{definition}[]
+    $A$ accepts $w$ if there \textbf{exists} at least 1 accepting run.
+\end{definition}
+
+\subsection{A small NFA can replace a DFA}\label{sub:A small NFA can replace a DFA} % (fold)
+For every $k \in \N$ we will define $L_k$ to be the language over $\Sigma = \left\{a, b\right\}$ that contains the words
+for whom the $k$th letter from the end is $a$.
+\begin{enumerate}
+    \item Design a DFA that decides $L_2$
+    \item Design a NFA that decides $L_2$
+    \item For a general $k$, show that there exists an NFA with $k + 1$ states that decides $L_k$
+    \item For a general $k$, show that any DFA that decides $L_k$ has at least $2^k$ states
+\end{enumerate}
+\begin{enumerate}
+    \item The following DFA decides $L_2$: \\
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (qbb) {$q_{bb}$};
+                \node[state, right of=qbb] (qba) {$q_{ba}$};
+                \node[state, accepting, below of=qbb] (qab) {$q_{ab}$};
+                \node[state, accepting, right of=qab] (qaa) {$q_{aa}$};
+
+                \draw   (qbb) edge[->, loop above] node{b} (qbb)
+                        (qbb) edge[->, above] node{a} (qba)
+                        (qba) edge[->, right] node{a} (qaa)
+                        (qba) edge[->, bend right, above left] node{b} (qab)
+                        (qaa) edge[->, loop right, right] node{a} (qaa)
+                        (qaa) edge[->, below] node{b} (qab)
+                        (qab) edge[->, bend right, below right] node{a} (qba)
+                        (qab) edge[->, left] node{b} (qbb)
+
+                        ;
+            \end{tikzpicture} \\
+        \end{center}
+    \item The following NFA decides $L_2$: \\
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, right of=q0] (q1) {$q_1$};
+                \node[state, accepting, right of=q1] (q2) {$q_2$};
+
+                \draw   (q0) edge[loop above] node{a, b} (q0)
+                        (q0) edge[->, above] node{a} (q1)
+                        (q1) edge[->, above] node{a, b} (q2);
+            \end{tikzpicture} \\
+        \end{center}
+    \item The following NFA with $k + 1$ states decides $L_k$: \\
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, right of=q0] (q1) {$q_1$};
+                \node[state, right of=q1] (q2) {$q_2$};
+                \node[state, right of=q2] (dots) {$\dots$};
+                \node[state, right of=dots] (qkm1) {$q_{k - 1}$};
+                \node[state, accepting, right of=qkm1] (qk) {$q_{k}$};
+
+                \draw   (q0) edge[loop above] node{a, b} (q0)
+                        (q0) edge[->, above] node{a} (q1)
+                        (q1) edge[->, above] node{a, b} (q2)
+                        (q2) edge[->, above] node{a, b} (dots)
+                        (dots) edge[->, above] node{a, b} (qkm1)
+                        (qkm1) edge[->, above] node{a, b} (qk)
+                        ;
+            \end{tikzpicture} \\
+        \end{center}
+        We want to find for all $Q' \subseteq Q$ which words $w$ can finish running in $Q'$. For the word $w$ we will
+        write $i_1, \dots, i_l$ the locations of $a$ from the end (only in the last $k$ letters), and we will claim
+        that these words whose $a$ positions as described above can reach $\left\{q_0, q_{i_1}, \dots, q_{i_l}\right\}$.
+        For the inductive step we will decompose the word $w$ as $w' \alpha$, where $\alpha \in \left\{a, b\right\}$. By
+        the induction hypothesis, we determine the possible sets of states that $u$ can reach. Then for each $\alpha \in
+        \left\{a, b\right\}$, we verify the states that $\delta$ may lead $w$ to are exactly those in the inductive
+        claim.
+    \item We will assume the contradiction that $A$ with less than $2^k$ states can decide $L \left(A\right) = L_k$. We
+        will note that there are $2^k$ words of length $k$. Therefore, from the pigeonhole principle, there exists $u
+        \ne v$  that finish their runs at the same state. For every word $w \in \Sigma^*$, then $u \cdot w \land v \cdot
+        w$ finish in the same state, and therefore are either both accepted, or both rejected. Let us denote as $i$ the
+        first index where the two words differ, and without loss of generality define $u_i = a$, and $v_i = b$. If we
+        create the words $u' = u \cdot a^{i - 1}, v' = v \cdot a^{i - 1}$, we know that the $k$th letter from the end of
+        $u'$ is $a$, and thus is accepted by $A$, but the $k$th letter from the end of $v'$ is $b$, and is thus
+        rejected, in contradiction, and thus $A$ has at least $2^k$ states.
+\end{enumerate}
+% subsection A small NFA can replace a DFA (end)
+% section Non-deterministic Finite Automaton (end)
+
+\section{Closure properties of NREG}\label{sec:Closure properties of NREG} % (fold)
+\begin{definition}[NREG]
+    \[
+        NREG = \left\{L \subseteq \Sigma^* : \exists \text{NFA that decides } LL\right\}
+    \]
+\end{definition}
+
+\subsection{Union}\label{sub:Union} % (fold)
+\begin{theorem}[]
+   NREG is closed to union: \[
+       L_1, L_2 \in NREG \implies L_1 \cup L_2 \in NREG
+   \]
+   \begin{proof}[Proof ]
+       $L_1, L_2 \in NREG \implies $ that there be \begin{gather*}
+        A = \left(Q, \Sigma, \delta, Q_0, F\right) \\
+        B = \left(P, \Sigma, \eta, P_0, G\right)
+       \end{gather*}
+       Such that $L \left(A \right) = L_1, L \left(B\right) = L_2$. We will define \begin{align*}
+           C &= \left(Q \cup P, \Sigma, \alpha, Q_0 \cup P_0, F \cup G\right) \\
+           \alpha \left(q, \alpha\right) &= \begin{cases}
+            \delta \left(q, \alpha\right), &\text{ if }q \in Q\\
+            \eta \left(q, \alpha\right), &\text{ if }q \in P\\
+           \end{cases}
+       \end{align*}
+       Let there be $w = w_1 \dots w_n$, and $r_0, \dots, r_n$ be the run of $C$ on $w$. We want to show that all of the
+       run is contained within $Q$ or within $P$. For $r_0 \in Q_0$, we may see by induction that \begin{align*}
+           r_{i + 1} \in \alpha \left(r_i, w_{i + 1}\right) &= \delta \left(r_i, w_{i + 1}\right) \in Q \\
+       \end{align*}
+       We may similarly show for $r_0 \in P_0$. \\
+
+       We will prove that $L \left(C\right) = L_1 \cup L_2$ through two sided containment:
+       \begin{enumerate}
+           \item Let there be $w \in L_1 \cup L_2$. Without loss of generality, $w \in L_1$. There exists an accepted
+               run of $A$ on $w$ which we will call $r$. Therefore, $r$ is an accepted run on $C$.
+           \item Let there be $w \in L \left(C\right)$. There exists a run of $C$ on $w$ $r = r_0 \dots r_n$. Without
+               loss of generality $r_0 \in Q_0$. Therefore, the run $r$ is contained in $Q$, and thus $r \in L
+               \left(A\right)$.
+       \end{enumerate}
+       Therefore, $L \left(C\right) = L_1 \cup L_2$
+   \end{proof}
+\end{theorem}
+% subsection Union (end)
+
+\subsection{Concatenation}\label{sub:Concatenation} % (fold)
+\begin{theorem}[]
+    \[
+        L_1 \cdot L_2 = \left\{w_1 \cdot w_2 : w_1 \in L_1, w_2 \in L_2\right\}
+    \]
+    \begin{proof}[Proof ]
+        Let there be \begin{gather*}
+            A = \left(Q, \Sigma, \delta, Q_0, F\right) \\
+            B = \left(P, \Sigma, \eta, P_0, G\right)
+       \end{gather*}
+       NFAs that recognise $L_1$ and $L_2$ respectively. We want to construct an NFA $C$ such that $L \left(C\right) = L
+       \left(A\right) \cdot L \left(B\right)$. We will need: \\
+       \begin{itemize}
+        \item States = $Q \cup P$
+        \item Alphabet = $\Sigma$
+        \item Transition function = All the transitions of $A$ and all the transitions of $B$ and a transition
+            $\varepsilon$ between all accepting states of $A$ to all the starting states of $B$
+        \item Start states = $Q_0$
+        \item Finish states = $G$
+       \end{itemize}
+    \end{proof}
+\end{theorem}
+For example, let us consider the regular expressions $L_1 = \left(ab\right)^*,\ L_2 = \left(ac\right)^*$ over $\Sigma =
+\left\{a, b, c\right\}$. They respectively are the automota:
+
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, accepting, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0);
+    \end{tikzpicture} \\
+\end{center}
+and
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, accepting, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{c} (q0);
+    \end{tikzpicture} \\
+\end{center}
+
+So to use the construction described above:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, accepting, right of=q1 ] (q2) {$q_2$};
+        \node[state, right of=q2] (q3) {$q_3$};
+
+        \draw   (q0) edge[->, bend left, below] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                (q2) edge[->, bend left, above] node{a} (q3)
+                (q3) edge[->, bend left, below] node{c} (q2)
+                (q0) edge[->, bend left, above] node{$\varepsilon$} (q2);
+    \end{tikzpicture} \\
+\end{center} % TODO there is a prettier arrangement
+% subsection Concatenation (end)
+% section Closure properties of NREG (end)
+
+\section{Formalising epsilon transitions}\label{sec:Formalising epsilon transitions} % (fold)
+How can we perform the last NFA without $\varepsilon$ transitions?
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, initial above, accepting, right of=q1 ] (q2) {$q_2$};
+        \node[state, right of=q2] (q3) {$q_3$};
+
+        \draw   (q0) edge[->, bend left, below] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                (q2) edge[->, bend left, above] node{a} (q3)
+                (q3) edge[->, bend left, below] node{c} (q2)
+                (q1) edge[->, below] node{b} (q2)
+                ;
+    \end{tikzpicture} \\
+\end{center} % TODO there is a prettier arrangement
+
+Let us formalise the concept. Given an NFA with $\varepsilon$ transitions, we denote the non $\varepsilon$ transitions
+by $\eta: Q \times \Sigma \to 2^Q$. Suppose that there is a transition from $q$ to $q'$ labelled $a$, and a transition
+from $q'$ to $q''$ labelled $\varepsilon$. We will add in $\delta$ to be our target transition function. Therefore
+$\delta$ must contain a transition from $q$ to $q''$ through the label $a$. This is almost sufficient, but what if there
+are more states reachable from $q'$ through $\varepsilon$? We will want $a$ transitions from $q$ to those states as
+well. We will define the additional \[
+    E \left(q\right) = \left\{q' \in Q : q' \text{ is reachable from } q \text{ using only } \varepsilon \text{
+    transitions} \right\}
+\]
+We can thus define $\delta$ as follows: \[
+    \delta \left(q, \alpha\right) = \displaystyle\bigcup_{q' \in \eta \left(q, \alpha\right)}^{} E \left(q'\right)
+\]
+Now every transition from $q$ to $q'$ takes into account all $\varepsilon$ transitions reachable from $q'$. We must now
+consider the initial states: Suppose that $P_0$ is the set of initial states on the graph before we take the
+$\varepsilon$ transitions into account. We will define our set of initial states as follows: \[
+    Q_0 = \displaystyle\bigcup_{q \in P_0}^{} E \left(q\right)
+\]
+So every state reachable from an initial state via an $\varepsilon$ transition is considered an initial state.
+% section Formalising epsilon transitions (end)
+
+\section{Delta star for NFAs}\label{sec:Delta star for NFAs}% (fold)
+\begin{definition}[$\delta^*$]
+    \begin{align*}
+        \delta^* &: 2^Q \times \Sigma^* \to 2^Q \\
+        \delta^* \left(S, w\right) = \left\{q \in Q : \text{ there is a run such that } r_0 \in S, r_n = q \land \forall
+            0 \leq i < n\ r_{i + 1} \in \delta \left(r_i, w_{i + 1}\right)\right\}
+    \end{align*}
+    or recursively \[
+        \delta^*\left(S, w\right) = \begin{cases}
+            S, &\text{ if }w = \varepsilon\\
+            \displaystyle\bigcup_{q \in \delta^* \left(S, w'\right)}^{} \delta \left(q, \alpha\right), &\text{ if }w =
+            w' \alpha\\
+        \end{cases}
+    \]
+\end{definition}
+\begin{theorem}[]
+    Both above representations are equivalent
+
+    \begin{proof}[Proof ]
+        We will show that the first case satisfies both the base case, and the recursive case. Since they agree on both,
+        then they have the same definition. In this proof, $\delta^*$ will refer to the first definition, and $S
+        \subseteq Q$. \\
+        Base case: Let $w = \varepsilon$. A run on $\varepsilon$ starts at some state $r_0 \in S$, and immediately
+        stops. Therefore, the reachable states are the states in $S$, and we have shown that $\delta^* \left(S,
+        \varepsilon\right) = S$ \\
+        Recursive case: Let $w = w' \alpha$. We want to prove that \[
+            \delta^* \left(S, w' \alpha\right) = \displaystyle\bigcup_{q \in \delta^* \left(S, w'\right)}^{} \delta
+            \left(q, \alpha\right)
+        \]
+        We shall do this through two sided containment: \begin{enumerate}
+            \item Let $r_n \in \delta^* \left(S, w' \alpha\right)$. There is a run $r_0, \dots, r_n$ on $w'\alpha$, that
+                starts in $S$, where $r_n \in \delta \left(r_{n - 1}, \alpha\right)$. Since $r_0, \dots, r_{n - 1}$ is a
+                run on $w'$ starting in $S$, so $r_{n - 1} \in \delta^* \left(S, w'\right)$, therefore \[
+                    r_n \in \delta \left(r_{n - 1}, \alpha\right) \subseteq \displaystyle\bigcup_{q \in \delta^*
+                    \left(S, w'\right)}^{} \delta \left(q, \alpha\right)
+                \]
+            \item Let $r_n \in \displaystyle\bigcup_{q \in \delta^* \left(S, w'\right)}^{}\delta \left(q,
+                \alpha\right)$. Then there is some $r_{n - 1} \in \delta^* \left(S, w'\right)$ for which $r_n \in \delta
+                \left(r_{n - 1}, \alpha\right)$. There is a run $r_0, \dots, r_{n - 1}$ from $S$ on $w'$, and since $r_n
+                \in \delta \left(r_{n - 1}, \alpha\right)$, we have shown that $r_0, \dots, r_n$ is a run from $S$ to
+                $r_n$. Therefore, $r_n \in \delta^* \left(S, w' \cdot \alpha\right)$
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+% section Delta star for NFAs (end)
+
+\end{document}
