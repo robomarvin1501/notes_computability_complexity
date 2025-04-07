@@ -1,0 +1,173 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 3}
+\author{Gidon Rosalki}
+\date{2025-04-06}
+
+
+\begin{document}
+\maketitle
+\section{Reminder}\label{sec:Reminder} % (fold)
+A legal run on $w \in \Sigma^*$ from $q \in Q$: For the letters $w = w_1 \dots w_k$ is a series of states $q^0, \dots,
+q^k$, such that $q^0 = q$, and $q^i \in \delta \left(q^{i - 1}, w_i\right)$. \\
+A run on $w$ is a correct run on $w$ that starts at a state within $Q_0$. \\
+The extended transition function of $A$: $\delta^* : 2^Q \times \Sigma^* \to 2^Q$ where $\delta^* \left(S, w\right)$ is \begin{enumerate}
+    \item The collection of states that we may get to from a correct run on $w$ that starts in some state within $S$.
+    \item $S$ when $w = \varepsilon$, otherwise when $w = w' \alpha$.
+\end{enumerate}
+
+\begin{theorem}[]
+    1 and 2 are equivalent definitions for $\delta$ on $w$
+    \begin{proof}
+        This is not a proof, but the proof is by induction. \\
+
+    \end{proof}
+\end{theorem}
+% section Reminder (end)
+
+\begin{theorem}[]
+    $NREG = REG$
+    \begin{proof}[Proof ]
+        \begin{itemize}
+            \item $REG \subseteq NREG$: This is true since a DFA is turned into an NFA through a very simple change in
+                minor definitions.
+            \item $NREG \subseteq REG$: Let there be $L \in NREG$, and $A = \left(\Sigma, Q, Q_0, F, \delta\right)$, a
+                NFA that recognises it. We will build an automaton $A_d$ that decides $L$ through $A_d$. We know that
+                $A_d$ has the same alphabet, but what is its states? \\
+                The concept: $A_d$ will have a state for every subset $S \subseteq Q$, when running $A_d$ on w, $A_d$
+                will get to state $\delta^* \left(Q_0, w\right)$. \\
+                Considering this, let us define $A_d = \left(\Sigma, 2^Q, Q_0, F_d, \delta_d\right)$,
+                where \begin{align*}
+                    F_d &= \left\{S \subseteq Q : S \cap F \ne \emptyset\right\} \\
+                    \delta_d \left(S, \alpha\right) &= \delta^* \left(S, \alpha\right) \\
+                \end{align*}
+                Our theorem is that $L \left(A_d\right) = L \left(A\right)$, and it is sufficient to show that $\delta^*
+                \left(Q_0, w\right) = \delta^* \left(Q_0, w\right)$, since if we do show this then we get $w \in L
+                \left(A_d\right) \Leftrightarrow \delta^*_d \left(Q_0, w\right) \in F_d \Leftrightarrow \delta^*
+                \left(Q_0, w\right) \in F_d \Leftrightarrow \delta^* \left(Q_0, w\right) \cap F \ne \emptyset
+                \Leftrightarrow w \in L \left(A\right)$. \\
+                By induction on $\left|w\right|$: \\
+                Basis: $\delta^* \left(Q_0, \varepsilon\right) = Q_0 = \delta^* \left(Q_0, \varepsilon\right)$. \\
+                $w = w' \alpha$: \begin{align*}
+                    \delta^*_d \left(Q_0, w'\alpha\right) &= \delta_d \left(\delta_d^* \left(Q_0, w'\right),
+                    \alpha\right) \\
+                                  &= \delta_d \left(\delta^* \left(Q_0, w'\right), \alpha\right) \\
+                                  &= \delta^* \left(\delta^* \left(Q_0, w'\right), \alpha\right) \\
+                                  &= \delta^* \left(Q_0, w'\alpha\right)
+                \end{align*}
+                as required.
+        \end{itemize}
+    \end{proof}
+\end{theorem}
+
+Do we absolutely need the exponential growth of states? Yes. Example: Let there be $\Sigma = \left\{0, 1\right\}$, for
+$k \in \N$, we will define \[
+    L_k := \Sigma^* \cdot \left\{1\right\} \cdot \Sigma^{k - 1}
+\]
+The NFA
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+        \node[state, right of=q2] (dots) {$\dots$};
+        \node[state, right of=dots] (qkm1) {$q_{k - 1}$};
+        \node[state, accepting, right of=qkm1] (qk) {$q_{k}$};
+
+        \draw   (q0) edge[loop above] node{0, 1} (q0)
+                (q0) edge[->, above] node{0} (q1)
+                (q1) edge[->, above] node{0, 1} (q2)
+                (q2) edge[->, above] node{0, 1} (dots)
+                (dots) edge[->, above] node{0, 1} (qkm1)
+                (qkm1) edge[->, above] node{0, 1} (qk)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+recognises the alphabet through $k + 1$ states.
+\begin{definition}[Myhill-Nerode (MN)]
+    If $L$ is a language on $\Sigma$, and $x, y \in \Sigma^*$. We will say that $x$ and $y$ are not MN-equivalent with
+    respect to $L$ if there exists a word $z \in \Sigma^*$ such that $xz \in L \land yz \in L \lor xz \notin L \land yz
+    \notin L$. In this case we will write $x \nsim_L y$ and we will write that $z$ is the differentiating suffix. If
+    there is no differentiation suffix, then we will write that $x \sim_L y$, and say that they are equivalent with
+    respect to $L$.
+\end{definition}
+
+Benefits: \begin{enumerate}
+    \item We will assume that $x \sim_L y$ and $x \in L$, then $y \in L$
+    \item We will assume that $x \nsim_L y$, and $L = L \left(A\right)$ where $A \in DFA$, then when running on $x$ and
+        on $y$, $A$ will reach different states, since otherwise $A$ would reach the same state on $xz$, and on $yz$ for
+        every suffix $z$.
+    \item If there are $n$ words in $\Sigma^*$, that are not equivalent, then $A$ has at least $n$ states. Or If in the
+        ratio $\sim_L$ there are $k$ equivalency sets, then in the DFA that decides $L$, there are at least $k$ states.
+\end{enumerate}
+Conclusion If there are $\infty$ equivalency states $\sim_L$, then $L \notin REG$. \\
+To sum up, if $\sim_L$ has at least $k$ sets, then in the automaton that decides $L$, there are at least $k$ states,
+therefore if there is $A$ that decides $L$, then the number of sets in $\sim_L$ is at most $n$
+
+For every 2 different words $x, y \in \left\{0, 1\right\}^*$, $x \nsim_{L_k} y$: For words such as these, there exists
+$1 \leq i \leq k$ such that $x_i \ne y_i$. We will define $z = 0^{k - i + 1}$. This way the $i$th letter is $k$ before
+the end of both words. This is to say that in $xz$, the $k$th letter before the end is $x_i$, and is $y_i$ in $yz$. So
+only one of $xz$ and $yz$ will be in the language $L_k$, and so $y \nsim_{L_k} x$, and so the automaton that decides
+$L_k$ has at least $2^k$ states.
+
+$\Sigma = \left\{a, b\right\}$, $L = \left\{a^nb^n : n \geq 0\right\}$. For every $m \ne n$, $a^n \nsim_L a^m$. This
+comes from $a^nb^n \in L, a^mb^n \notin L$, and so $L \notin REG$.
+
+Symbol: $\left[w\right]_L$ the equivalency set of $w$ with respect to $L$ (as defined in discrete maths)
+\begin{theorem}[]
+    If $L$ is a language on $\Sigma$, and in $\sim_L$ there are $k < \infty$ equivalency sets, then $L \in REG$. and
+    there is a $DFA$ for $L$ with $k$ states.
+
+    \begin{proof}[Proof ]
+        Concept: We will symbolise the set of equivalency sets in $\sim_L$ as $Q$. These will be the states, and thus
+        $\delta^* \left(q_0, w\right) = \left[w\right]_L$. \\
+        Building $A$: $A = \left(\Sigma, Q, \left[\varepsilon\right]_L, F, \delta\right)$ where \begin{align*}
+            F &= \left\{\left[w\right]_L : w \in L\right\} \\
+            \delta \left(\left[w\right]_L, \alpha\right) &= \left[w \alpha\right]_L
+        \end{align*}
+        We need to verify that if $\left[w\right]_L = \left[y\right]_L$, then $\left[w\alpha\right]_L =
+        \left[y\alpha\right]_L$: \begin{align*}
+            \left[w\right]_L = \left[y\right]_L &\implies w \sim_L y \\
+                        &\implies \forall z\ wz \in L \Leftrightarrow yz \in L \\
+                        &\implies \forall z'\ w\alpha z' \in L \Leftrightarrow y\alpha z' \in L \\
+                        &\implies w\alpha \sim_L y\alpha \\
+                        &\implies \left[w\alpha\right]_L = \left[y\alpha\right]_L
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+
+\end{document}.
