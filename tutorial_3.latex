@@ -1,0 +1,286 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 3}
+\author{Gidon Rosalki}
+\date{2025-04-09}
+
+
+\begin{document}
+\maketitle
+\section{Determinisation}\label{sec:Determinisation} % (fold)
+We will demonstrate how to construct a DFA that is equivalent to an NFA.
+\subsection{Subset construction}\label{sub:Subset construction} % (fold)
+Let there be the NFA $A = \left(Q, \Sigma, \delta, Q_0, F\right)$. We define an equivalent DFA $A_D = \left(P, \Sigma,
+\eta, p_0, G\right)$. In this case: \begin{itemize}
+    \item $P = 2^Q$
+    \item $p_0 = Q_0$
+    \item $G = \left\{S \subseteq Q : S \cap F \ne \emptyset\right\}$
+    \item The transition function includes every state in the NFA reachable from here: $\eta \left(S, \sigma\right)
+        = \displaystyle\bigcup_{q \in S}^{}\delta \left(q, \sigma\right)$
+\end{itemize}
+
+For example:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial above, accepting] (q0) {$q_0$};
+        \node[state, initial above, accepting, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+So after subset construction we get:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, accepting, initial] (q0) {$\left\{q_0, q_1\right\}$};
+        \node[state, accepting, right of=q0] (q1) {$\left\{q_0\right\}$};
+        \node[state, accepting, below of=q0] (q2) {$\left\{q_1\right\}$};
+        \node[state, below of=q1] (q3) {$\left\{\right\}$};
+
+        \draw   (q0) edge[->, above] node{b} (q1)
+                (q0) edge[->, left] node{a} (q2)
+                (q2) edge[->, bend left, above left] node{b} (q1)
+                (q1) edge[->, bend left, below right] node{a} (q2)
+                (q1) edge[->, right] node{b} (q3)
+                (q2) edge[->, below] node{a} (q3)
+                (q3) edge[->, loop right] node{a, b} (q3)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+% subsection Subset construction (end)
+
+\subsection{Simulation on an NFA}\label{sub:Simulation on an NFA} % (fold)
+Let there be an NFA $A$ with $n$ states. How do we determine the acceptance of the word $w$? We have a few options:
+\begin{enumerate}
+    \item Determinisation and running the word $w$ on the DFA: this will take $O \left(2^n \cdot \left|\Sigma\right|\right)$, both
+        in terms of runtime, and space. Running a word takes an additional $O \left(\left|w\right|\right)$.
+    \item Running all the available options - brute force: This will take $O \left(n^{\left|w\right|}\right)$ to go over
+        all the possible runs of the NFA over $w$.
+    \item \textbf{Subset construction simulation}: Here we iteratively evaluate all possible transition states for the
+        letter $\sigma_1 \dots \sigma_n$ of the word $w$. We accept if the final set contains a final state.
+\end{enumerate}
+% \usepackage{algorithm,algorithmicx,algpseudocode}
+\begin{algorithm}
+    \floatname{algorithm}{Subset construction simulation}
+    \algrenewcommand\algorithmicrequire{\textbf{w}}
+    \algrenewcommand\algorithmicensure{\textbf{bool}}
+    \caption{}\label{alg:}
+    \begin{algorithmic}[1]
+        \Require $input$
+        \Ensure $output$
+        \State $S \gets Q_0$
+        \For{i=1 in $\left[\left|w\right|\right]$}
+            \State $S \gets \displaystyle\bigcup_{q \in S}^{}\delta \left(q, \sigma_i\right)$
+        \EndFor
+        \If{$F \cap S \ne \emptyset$}
+            \State \textbf{return} accept
+        \Else
+            \State \textbf{return} reject
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+This will take $O \left(n^2 \cdot \left|w\right|\right)$.
+
+\begin{theorem}[]
+    After every step $i$, $S = \delta^* \left(Q_0, w_{\leq i}\right)$ where $w_{\leq i} = w_1 \dots w_i$
+
+    \begin{proof}[Proof ]
+        Guess what? It's by induction. Again. Feel free to do it yourself.
+    \end{proof}
+\end{theorem}
+
+Example:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+        \node[state, accepting, right of=q2] (q3) {$q_3$};
+
+        \draw   (q0) edge[loop above] node{a, b} (q0)
+                (q0) edge[->, above] node{a} (q1)
+                (q1) edge[->, above] node{a, b} (q2)
+                (q2) edge[->, above] node{a, b} (q3)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+This is the NFA that recognises $L_k = \left\{w \in \left\{a, b\right\}^* : \text{The } k \text{ letter from the end is
+} a\right\}$, so in this case $L_3$.
+So, if we simulate for the word $baabbb$, we get the following: \begin{enumerate}
+    \item $S = Q_0 = \left\{q_0\right\}$
+    \item $S = \left\{q_0\right\}$
+    \item $S = \delta \left(q_0, a\right) = \left\{q_0, q_1\right\}$
+    \item $S = \delta \left(q_0, a\right) \cup \delta \left(q_1, a\right) = \left\{q_0, q_1, q_2\right\}$
+    \item $S = \delta \left(q_0, q_b\right) \cup \delta \left(q_1, b\right) \cup \delta \left(q_2, b\right) =
+        \left\{q_0, q_1, q_2\right\}$
+    \item $S = \left\{q_0, q_3\right\}$
+    \item $S = \left\{q_0\right\}$
+\end{enumerate}
+% subsection Simulation on an NFA (end)
+% section Determinisation (end)
+
+\section{Myhill-Nerode}\label{sec:Myhill-Nerode} % (fold)
+\begin{definition}[Separating suffix]
+    Let there be $L \subseteq \Sigma^*$, and $x, y \in \Sigma^*$. $z \in \Sigma^*$ will be called the Separating suffix
+    if $xz \in L \land yz \notin L$, or the opposite.
+\end{definition}
+
+\begin{example}[]
+    Consider the language $L = \left\{w \in \left\{a, b\right\}^* : aa \subseteq w\right\}$.
+
+    \begin{center}
+        \begin{tikzpicture}[node distance=3cm]
+            \node[state, initial] (q0) {$q_0$};
+            \node[state, right of=q0] (q1) {$q_1$};
+            \node[state, accepting, right of=q1] (q2) {$q_2$};
+
+            \draw   (q0) edge[loop above] node{b} (q0)
+                    (q0) edge[->, bend left, above] node{a} (q1)
+                    (q1) edge[->, bend left, above] node{b} (q0)
+                    (q1) edge[->, above] node{a} (q2)
+                    (q2) edge[loop above] node{a, b} (q2)
+                    ;
+        \end{tikzpicture} \\
+    \end{center}
+    \begin{proof}[Solution]
+        So here $a$ is the separating suffix for the words $bbba$ and $b$, since $bbbaa \in L$ but $ba \notin L$.
+        However, $babab$ and $b$ do not have a separating suffix.
+    \end{proof}
+\end{example}
+\begin{theorem}[]
+    Let $L \in REG$, and let there be $A$ a DFA that decides the language $L$. Let there be $x, y \in \Sigma^*$. If when
+    running on $A$, $x, y$ both arrive at the same state, as in $\delta^* \left(q_0, x\right) = \delta^* \left(q_0,
+    y\right)$, then there does not exist a separating suffix.
+
+    \begin{proof}[Proof ]
+        Let there be $z \in \Sigma^*$. \begin{align*}
+            \delta^* \left(q_0, xz\right) &= \delta^* \left(\delta^* \left(q_0, x\right), z\right) \\
+                                          &= \delta^* \left(\delta^* \left(q_0, y\right), z\right) \\
+                                          &= \delta^* \left(q_0, yz\right)
+        \end{align*}
+        Therefore, $xz$ and $yz$ reach the same state, and therefore both belong to $L$, and do not belong to $L$
+        together.
+    \end{proof}
+\end{theorem}
+However, if $x, y$ have a separating suffix, then they will arrive at different states in $A$. Going back to our
+example, we can use this to show that there is no smaller DFA that recognises $L$. Consider $a, b, aa$: Every pair of
+two words have a separating suffix: \begin{itemize}
+    \item $a, b$ have the separating suffix $a$
+    \item $a, aa$ have the separating suffix $\varepsilon$
+    \item $b, aa$ have the separating suffix $\varepsilon$
+\end{itemize}
+We conclude that in every DFA $A$ that recognises $L$, each of the words $a, b, aa$ must reach a different state, so $A$
+has at least 3 states. Therefore, the DFA we saw above is minimal.
+
+\begin{definition}[Myhill-Nerode]
+    Let there be $L \subseteq \Sigma^*$. $x, y \in \Sigma^*$ will be called MN equivalent with respect to $L$ if there
+    does not exist a separating suffix between $x$ and $y$. In this case we will write $x \sim_L y$.
+\end{definition}
+
+\begin{theorem}[Equivalence classes]
+    $\sim_L$ is an equivalence class if \begin{itemize}
+        \item Reflexive: $x \sim_L x$
+        \item Symmetry: $x \sim_L y \Leftrightarrow y \sim_L x$
+        \item Transitivity: $x \sim_L y \land y \sim_L z \implies x \sim_L z$
+    \end{itemize}
+
+    \begin{proof}[Proof ]
+        The full proof is left as an exercise, but let us prove transitivity: Suppose that $x \sim_L y \land y \sim_L w$
+        then for every $z \in \Sigma^*$: \[
+            xz \in L \Leftrightarrow yz \in L \Leftrightarrow wz \in L
+        \]
+        So $xz \in L \Leftrightarrow wz \in L \implies x \sim_L w$
+    \end{proof}
+\end{theorem}
+
+So going back to the previous example, $L$ has 3 different MN equivalence classes. \begin{enumerate}
+    \item Words that contain $aa$
+    \item Words that don't contain $aa$, and end in $a$
+    \item Words that don't contain $aa$, and do not end in $a$
+\end{enumerate}
+
+\begin{theorem}[]
+    Given a regular language $L$, every MN equivalence class of $L$ corresponds to a single state in the minimal DFA
+    that decides L. In particular, the number of states in the minimal DFA is the number of MN equivalence classes.
+    \begin{proof}[Proof ]
+        In the lecture.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    The language $L = \left\{w \in \left\{a, b\right\}^* : \#_a \left(w\right) \geq \#_b \left(w\right)\right\}$ is not
+    regular.
+    \begin{proof}[Proof ]
+        Let us assume the contradiction that it is regular, and therefore tehre exists an automaton that decides $L$,
+        with $k$ states. Consider the following $k + 1$ words: $\varepsilon, a, aa, \dots, a^k$. Since there are $k +
+        1$, by the pigeonhole principle, 2 must reach the same state. Let there be such a pair $a^i$,
+        $a^j$, and we will assume without loss of generality that $i < j$. We will choose $z = b^j$. So $z$ is a
+        separating suffix for $a^i$ and $a^j$, thus contradicting the proposition.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    The language $L = \left\{q^{n^2} : n \geq 0\right\}$ (over $\Sigma = \left\{1\right\}$) is not regular.
+    \begin{proof}[Proof ]
+        Let there be, without loss of generality, $i < j$ such that $x = 1^{i^2}, y = 1^{j^2} \in L$. We will show that
+        $x, y$ belong to different classes. Let $z = 1^{2i + 1}$. So \[
+            \left|xz\right| = \left|x\right| + \left|z\right| = i^2 + 2i + 1 = \left(i + 1\right)^2
+        \]
+        So $xz \in L$. On the other hand \[
+            \left|yz\right| = \left|y\right| + \left|z\right| = j^2 + 2i + 1 < j^2 + 2j + 1 = \left(j + 1\right)^2
+        \]
+        So $j^2 < \left|yz\right| < \left(j + 1\right)^2$, so its length is not a square number, and therefore $yz
+        \notin L$.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    The language $L = \left\{1^p : p \text{ is a prime number} \right\}$ is not regular
+
+    \begin{proof}[Proof Sketch]
+        Every infinite unary regular language contains an arithmetic sequence. As there is a finite number of states, it
+        must be that there is a loop of size $k$. If $w \in L$, then also $w \cdot \sigma \dots \sigma \in L$ where
+        $\sigma$ appears $k$ times, or $2k$ times, and so on. The prime numbers do not contain an arithmetic sequence.
+        For every $n \in \N$, there is a sequence of size $n - 1$, which is not prime. For example, $n!, n! + 2, n! + 3,
+        \dots, n! + n$. Since $n!$ is not prime, and is a multiplication by 2 by definition, then $n! + 2$ is not prime
+        as it is divisible by $2$. Similarly, $n! + 3$ is not prime since it is divisible by $3$, and so on.
+    \end{proof}
+\end{theorem}
+
+% section Myhill-Nerode (end)
+\end{document}
