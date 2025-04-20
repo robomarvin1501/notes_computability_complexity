@@ -1,0 +1,315 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 4}
+\author{Gidon Rosalki}
+\date{2025-04-20}
+
+
+\begin{document}
+\maketitle
+We have extensively discussed DFAs, and mostly solved the problem (not entirely, but for our purposes). These could only
+take input, and would change state according to them, and only them. However, what if there is a state machine, that not
+only takes inputs, but also takes input from the environment? Let us consider for example a state machine that takes in
+the input from some sensor (temperature, air pressure, etc), and outputs light or dark depending on the input. Since we
+are also dependent on external values, and we want more options for outputs, we do not want to simply have true or false
+as our output, but more options. So we shall have states, and letters that move us from state to state, and for these
+transitions, the transitions will also be annotated with the output. For example:
+
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, bend left, above] node{a, ON} (q1)
+                (q0) edge[->, bend left, below] node{b, OFF} (q1)
+                (q1) edge[->, bend left, above] node{a, OFF} (q0)
+                (q1) edge[->, bend left, below] node{b, ON} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+\section{Turing machines (TMs)}\label{sec:Turing machines (TMs)} % (fold)
+A Turing machine has a tape, comprised of cells, and the read/write head which points at a cell. In each cell of the
+tape there is inscribed a letter. Additionally, the TM has a state machine, and it is currently located in a state.
+Every time it reads a letter from the tape, it transitions to a state, and emits both a letter, and a direction (R/L).
+Emitting a letter means rewriting the current cell's letter (\textbf{before} moving on the tape). For example:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \draw   (q0) edge[->, loop above] node{a, b, R} (q0)
+                (q0) edge[->, loop right] node{b, a, R} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+So here, when the TM reads an $a$, replaces it with $b$ and moves right on the tape. For when we reach the end of the
+tape, we will define the letter "\textvisiblespace", which is an empty letter. We can additionally then add on to our state machine
+a final state as follows:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0, accepting] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, loop above] node{a, b, R} (q0)
+                (q0) edge[->, loop below] node{b, a, R} (q0)
+                (q0) edge[->, above] node{\textvisiblespace, \textvisiblespace, L} (q1)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+\subsection{Runs on TMs}\label{sub:Runs on TMs} % (fold)
+Let there be a series of cells $\omega_1, \dots, \omega_k$ on the tape. We shall state that $\omega_1$ is the starting cell, so at
+$\omega_1$ we know that the machine is in the initial state (generally $q_0$). We can call this  entire definition the
+\textbf{configuration}. Should we consider the following machine:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, above] node{$\omega_1, \alpha, R$} (q1)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+Then the configuration $C_0$ will be the series of states $q_0 \to \omega_1, \dots, \omega_k$. Should we take the
+configuration of $\alpha, q_1 \to \omega_2, \dots, \omega_k$, then we are in configuration $C_1$, which is the
+subsequent configuration to $C_0$. The final configuration is a configuration that finishes in a final state. \\
+Now that we have configurations, we may define a run on a TM: A partial run on the TM T, with input $\omega$ is a series
+(finite or infinite) of configurations $C_0, C_1, \dots$ such that $C_0 = q_0 \to \omega_1, \dots, \omega_k$ is the
+starting configuration in the run of T on $\omega$, and for all $i > 0$, $C_i$ is the following configuration of $C_{i -
+1}$. The run is \textbf{full} if it is finite, and finishes in a final configuration, or if it is infinite.
+
+The \textbf{runtime} of a TM T on the input $\omega$ is the length of the full run on $\omega$ minus 1. \\
+The \textbf{output} is the content of the tape at the end of the full run (if it is finite).
+\textbf{Configuration}: This can be shown graphically as $\alpha_1, \dots, q \to \alpha_i, \dots, \alpha_k$, but we may
+represent it as well as follows: $\alpha_1 \dots \alpha_{i - 1} q \alpha_i \dots \alpha_k$
+% subsection Runs on TMs (end)
+
+\subsection{Successor}\label{sub:Successor} % (fold)
+Let us consider an problem with the input $x \in \left\{0, 1\right\}^*$, and the output is $x + 1$. We will note that
+adding 1 to a binary number is simply converting all the rightmost 1s that touch the rightmost bit to 0, and converting
+the first 0 to 1 ($101011 \to 101100$). To create a TM that does this, we will do the following:
+Firstly, we will find the rightmost edge of the input:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+        \draw   (q0) edge[->, loop above] node{1, 1, R} (q0)
+                (q0) edge[->, loop below] node{0, 0, R} (q0)
+                (q0) edge[->, above] node{\textvisiblespace, \textvisiblespace, L} (q1)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+Next, we will convert all the 1s to 0s until we find 0. We will convert it to 1, and finish.
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1, accepting] (qf) {$q_F$};
+
+        \draw   (q0) edge[->, loop above] node{1, 1, R} (q0)
+                (q0) edge[->, loop below] node{0, 0, R} (q0)
+                (q0) edge[->, above] node{\textvisiblespace, \textvisiblespace, L} (q1)
+                (q1) edge[->, loop above] node{1, 0, L} (q1)
+                (q1) edge[->, bend left, above] node{0, 1, R} (qf)
+                (q1) edge[->, bend right, below] node{\textvisiblespace, 1, R} (qf)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+The runtime will be $O \left(2n\right) + O \left(2\right) \left(= O \left(n\right)\right)$, since in the worst case we
+pass over the whole number twice, and off one space on the right, and one space on the left.
+% subsection Successor (end)
+
+\subsection{Predecessor}\label{sub:Predecessor} % (fold)
+\textbf{Input}: $x \in \left\{0, 1\right\}^*$ \\
+\textbf{Output}: $\begin{cases}
+    x - 1, &\text{ if }x > 0\\
+    x, & \text{ otherwise }
+\end{cases}$
+
+This algorithm can be seen as starting from the right, converting all the 0s to 1s, until we find a 1, at which point we
+convert it to 0, and finish (unless $x = 0$). \\
+To do this, we will start by finding the rightmost edge of the input, but if the input is $0$, we will stop.
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, above of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+        \node[state, below of=q2, accepting] (qf) {$q_F$};
+
+        \draw   (q0) edge[->, loop below] node{0, 0, R} (q0)
+                (q0) edge[->, below] node{\textvisiblespace, \textvisiblespace, R} (qf)
+                (q0) edge[->, left] node{1, 1, R} (q1)
+                (q1) edge[->, loop above] node{0, 0, R} (q1)
+                (q1) edge[->, loop left] node{1, 1, R} (q1)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+Next is like above, but swapping 0s and ones
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, above of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (q2) {$q_2$};
+        \node[state, below of=q2, accepting] (qf) {$q_F$};
+
+        \draw   (q0) edge[->, loop below] node{0, 0, R} (q0)
+                (q0) edge[->, below] node{\textvisiblespace, \textvisiblespace, R} (qf)
+                (q0) edge[->, left] node{1, 1, R} (q1)
+                (q1) edge[->, loop above] node{0, 0, R} (q1)
+                (q1) edge[->, loop left] node{1, 1, R} (q1)
+                (q1) edge[->, above] node{\textvisiblespace, \textvisiblespace, L} (q2)
+                (q2) edge[->, loop above] node{0, 1, L} (q2)
+                (q2) edge[->, bend left, right] node{1, 0, R} (qf)
+                (q2) edge[->, bend right, left] node{\textvisiblespace, 0, R} (qf)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+% subsection Predecessor (end)
+
+\subsection{Formal definition}\label{sub:Formal definition} % (fold)
+A Turing Machine T can be described as follows: \[
+    T = \left(\Sigma, \Gamma, \text{\textvisiblespace} , Q, q_0, F, \delta\right)
+\]
+Where \begin{itemize}
+    \item $\Sigma$ is the alphabet of the input, a finite non empty set.
+    \item $\Gamma$ is the working alphabet, $\Sigma \subseteq \Gamma$ (and is naturally also finite)
+    \item \textvisiblespace\ is the empty letter, and \textvisiblespace\ $\in \Gamma \setminus \Sigma$
+    \item $Q$ is the set of states (finite)
+    \item $q_0 \in Q$ the initial state
+    \item $F \subseteq Q$ is the set of final states (Sometimes $F = \left\{q_F\right\}$, and sometimes $F =
+        \left\{q_{acc}, q_{rej}\right\}$)
+    \item $\delta$ the transition function, where $\delta: \Gamma \times \left(Q \setminus F\right) \to Q \times \Gamma
+        \times \left\{R, L\right\}$
+\end{itemize}
+% subsection Formal definition (end)
+
+\subsection{Addition}\label{sub:Addition} % (fold)
+\textbf{Input}: $x\#y$ where $x, y \in \left\{0, 1\right\}^*$ (note, $\# \in \Sigma$) \\
+\textbf{Output}: $x + y\#$ \\
+Implementation: \begin{enumerate}
+    \item We will go right until we are one cell to the right of $\#$.
+    \item We will subtract 1 from $y$, and if $y = 0$ we will go over all the letters of y from right to left and
+        convert them to spaces, and stop when we arrive at $\#$.
+    \item We will run left until 1 after the $\#$
+    \item We will add 1 to $x$
+    \item We will return to the first step
+\end{enumerate}
+This is horrifically inefficient, and runs in exponential time. Effectively, the runtime is the value of $y$.
+% subsection Addition (end)
+
+\subsection{Concatenation}\label{sub:Concatenation} % (fold)
+\textbf{Input}: $x \in \left\{a, b\right\}^*$  \\
+\textbf{Output}: $x\#x$ \\
+We could take the first letter, replace it with a space, and reinsert it after the $\#$, but this will just leave us
+with the word moved to after the $\#$. We shall add the symbols: \[
+    \Gamma = \Sigma \cup \Sigma \times \left\{\_, \hat{ }\right\} \cup \left\{\text{\textvisiblespace} \right\} \cup
+    \dots
+\]
+Technically, given $a \in \Sigma$, then it would be akin to $\left(a, \_\right) \in \Gamma$, but we will simply write
+$\underline{a}$.
+
+\begin{enumerate}
+    \item Go right until the \textvisiblespace, and replace it with $\#$
+    \item We will go left until \textvisiblespace\ or until a diacritic letter, and then go one step right
+    \item
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state, initial] (q0) {$q_0$};
+                \node[state, right of=q0] (q1) {$q_1$};
+                \node[state, right of=q1] (q2) {$q_2$};
+                \node[state, above right of=q2] (qa) {$q_a$};
+                \node[state, below right of=q2] (qb) {$q_b$};
+                \node[state, below of=q2] (qc) {$q_c$};
+                \node[state, right of=qc, accepting] (qf) {$q_F$};
+
+
+                \draw   (q0) edge[->, loop above] node{a, a, R} (q0)
+                        (q0) edge[->, loop below] node{b, b, R} (q0)
+                        (q0) edge[->, above] node{\textvisiblespace, \#, L} (q1)
+
+                        (q1) edge[->, loop above] node{a, a, L} (q1)
+                        (q1) edge[->, loop below] node{b, b, L} (q1)
+                        (q1) edge[->, bend left, above] node{\textvisiblespace, \#, L} (q2)
+                        (q1) edge[->, bend left, below] node{$\underline{a}, \underline{a}$ , L} (q2)
+                        (q1) edge[->, bend right, below] node{$\underline{b}, \underline{b}$ , L} (q2)
+
+                        (q2) edge[->, below right] node{a, $\underline{a}$, R} (qa)
+                        (q2) edge[->, above right] node{b, $\underline{b}$, R} (qb)
+                        (q2) edge[->, left] node{$\#, \#$, L} (qc)
+
+                        (qc) edge[->, loop below] node{a, a, L} (qc)
+                        (qc) edge[->, below] node{$\#, \#$, L} (qf)
+                        ;
+            \end{tikzpicture} \\
+        \end{center}
+    \item
+        \begin{center}
+            \begin{tikzpicture}[node distance=3cm]
+                \node[state] (qa) {$q_a$};
+                \node[state, right of=qa] (q1) {$q_1$};
+
+
+                \draw   (qa) edge[->, loop above] node{a, a, R} (qa)
+                        (qa) edge[->, loop below] node{b, b, R} (qa)
+                        (qa) edge[->, loop left] node{\#, \#, R} (qa)
+                        (qa) edge[->, above] node{\textvisiblespace, a, L} (q1)
+                        ;
+            \end{tikzpicture} \\
+        \end{center}
+\end{enumerate}
+% subsection Concatenation (end)
+
+\subsection{Insertion}\label{sub:Insertion} % (fold)
+\textbf{Input}: $y\#x$ \\
+\textbf{Output}: $y\#\#x$ \\
+This is doable, and is left as an exercise to the reader (got to right until end, copy each letter right one until \#,
+repeat and stop).
+% subsection Insertion (end)
+
+\subsection{Multiplication}\label{sub:Multiplication} % (fold)
+\textbf{Input}: $x\#y$ \\
+\textbf{Output}: $x \cdot y \#$ \\
+As in, multiplication of the binary numbers $x$ and $y$. In short, we need to add $x$ to itself $y$ times. \\
+
+To do this, we will copy the $x$ to the left, so $x\#y \to x_c\#x\#y$, and then create $x_c\#x_c\#x\#y$. We then perform
+addition on the section $x_c\#x$, resulting in $x_c\#\left(x_c + x\right)\#y \to x_c\#2x\#\left(y - 1\right)$, and then
+return to the step where we copied over $x_c$.
+% subsection Multiplication (end)
+
+% section Turing machines (TMs) (end)
+
+\end{document}
