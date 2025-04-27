@@ -1,0 +1,248 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 5}
+\author{Gidon Rosalki}
+\date{2025-04-27}
+
+
+\begin{document}
+\maketitle
+\section{Calling TMs as procedures / functions}\label{sec:Calling TMs as procedures / functions} % (fold)
+(We have seen: Numbers, adding symbols, movement, adding letters above through ordered pairs)
+
+\subsection{Example - counting computation steps}\label{sub:Example - counting computation steps} % (fold)
+Task: Given a TM M, we want to create the TM M', such that if M stops on input $w$, then M' will also stop on $w$, and
+$M' \left(w\right) = M(w)\#t$, where $t$ is the binary representation of the number of steps that $M$ needed to compute
+$w$. The concept is that we will preserve on the tape what M does, and then a $\#$, followed by a counter. We are making
+the assumption that $\#$ is not part of the original alphabet. So, we then do a computation step of M, and then
+increment the counter, and then go back and compute the next step of M, increment the counter, and so on.
+Let there be S: \begin{enumerate}
+    \item Runs right, until finding the $\#$
+    \item If there is no number to the right of $\#$, then S writes 0 (perhaps we have not yet started the counter)
+    \item Add 1 to the counter
+    \item We will finish in state $s_F$
+\end{enumerate}
+M': \begin{enumerate}
+    \item Add $\#$ to the right of the input, and return to its beginning
+    \item Transition to the start state of M
+    \item Simulate a step of calculation of M
+    \item "Call" to S to increment the counter
+    \item Return to the original position, and state
+    \item Return to 3
+\end{enumerate}
+
+So, to create M', considering M, in state $q$, with the transition $a, b, R$, then in M', this will be from $q$,
+following the transition $\alpha, \hat{\alpha}, R$ to the state $q, s_0$. We are adding the state $\left(q, s\right)$
+for every state $q$ of M and $s$ of S. Additionally, considering a transition in S of $s$ to $s'$ following $\alpha,
+\beta, D$, then in M' we will have from $\left(q, s\right)$ to $\left(q, s'\right)$, following $\alpha, \beta, D$, until
+we eventually reach the state $\left(q, s_F\right)$. From here we need to add the following transitions: A loop for
+every non signed $\alpha$, the transition back to $\left(q, s_F\right)$ $\alpha, \alpha, L$. For when we do find a
+letter with a symbol, then we follow the transition $\overline{a}, b, R$ to $q'$ in the original TM M.
+
+Let us assume that $q$ is the final state of M. So for M', it is no longer a final state, and it still has the
+transition which adds a line above the letter (except we will skip the adding of the line, since it is unnecessary from
+the final state), and continues on to $\left(q, s_0\right)$. We will then finish at $\left(q, s_F\right)$.
+% subsection Example - counting computation steps (end)
+
+\subsection{TM as input to a TM}\label{sub:TM as input to a TM} % (fold)
+In order to give a TM T the input TM M, we need to convert M into a string.
+
+\begin{definition}[]
+    $<M>$ the string representation of the TM M
+\end{definition}
+
+We will explain the TM M as the string over $\left\{0, 1, \#, |\right\}$. W.l.o.g. $\Sigma \subseteq \Gamma \subseteq
+\N$. Additionally, w.l.o.g. $Q \subseteq \N$. Also w.l.o.g $\Gamma \cap Q = \emptyset$ (this last one is not necessarily
+required). \\
+So \begin{align*}
+    \Sigma = \left\{\alpha_1, \dots, \alpha_k\right\} &\implies \left\langle\Sigma\right\rangle = \left(\alpha_1\right)_b \#
+    \left(\alpha_2\right)_b \# \dots \left(\alpha_k\right)_b \#. \\
+    \Gamma = \left\{\alpha_1, \dots, \alpha_n\right\} &\implies \left\langle\Gamma\right\rangle = \dots \\
+    \text{\textvisiblespace}  = \alpha_7 \implies \left\langle\text{\textvisiblespace}\right\rangle = \left(\alpha_7\right)_b \\
+    Q = \left\{q_1, \dots, q_m\right\} &\implies \left\langle Q\right\rangle = \left(q_1\right)_b \# \dots \\
+    q_0, F &\implies \dots \\
+\end{align*}
+We will soon discuss $\delta$. So we may see that $<M> = \left\langle\Sigma\right\rangle \left\langle\Gamma\right\rangle |
+\left\langle\text{\textvisiblespace} \right\rangle | \dots | \left\langle\delta\right\rangle$. \\
+$\delta$: If $\delta \left(q, \alpha\right) = \left(q', \beta, D\right)$ then we will say that $\left(q, \alpha\right)
+\stackrel{\delta}{to} \left(q', \beta, D\right)$ is the transition. We will represent $\delta$ through representations
+of its transitions: \[
+    \#\#\left(q\right)_b\# \left(\alpha\right)_b \# \left(q'\right)_b \# \left(\beta\right)_b \# \left(D\right)_B
+\]
+We can additionally convert the input $w$ to a string $\left\langle w \right\rangle = \left(w_1\right)_b \#
+\left(w_2\right)_b \dots$, and so $\left\langle M, w \right\rangle = \left\langle M \right\rangle \left\langle w
+\right\rangle$.
+
+\begin{definition}[Universal TM]
+    A TM U is called \textbf{universal} if given $\left\langle M, w \right\rangle$: \begin{enumerate}
+        \item If M does not stop running on $w$, then $U$ will also not stop
+        \item If M stops on $w$, then U will stop, and \[
+                U \left(\left\langle M, w \right\rangle \right) = \left\langle M, w \right\rangle
+            \]
+        \item If the final states of M are $q_{\text{acc} } = 1,\ q_{\text{rej} } = 0$, then U will stop in the same
+            state as M.
+    \end{enumerate}
+\end{definition}
+
+\begin{theorem}[]
+    There exists a universal Turing machine U
+
+    \begin{proof}[Proof ]
+        This proof is incomplete. \\
+        The machine U will run in the following manner: \begin{enumerate}
+            \item Input $\left\langle M, w \right\rangle$
+            \item U will write on the tape $\left\langle M \right\rangle \left(q_0\right)_b \# \left\langle w
+                \right\rangle$ (Note that the elements after $\left\langle M \right\rangle$ are $C_0$)
+            \item $\left\langle M \right\rangle \left\langle C_i \right\rangle \to \left\langle M \right\rangle
+                \left\langle C_{i + 1} \right\rangle$
+            \item When we arrive to the final configuration: \begin{enumerate}
+                \item We will delete $\left\langle M \right\rangle$
+                \item We will delete $\left(q\right)_b$
+                \item If $q \in \left\{0, 1\right\}$, then finish in $q$, otherwise we will finish in $q_F$
+            \end{enumerate}
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+% subsection TM as input to a TM (end)
+
+\subsection{Does M stop on w?}\label{sub:Does M stop on w?} % (fold)
+Hey look! It's the halting problem! \\
+
+Let us define our language $HALT = HALT_{TM} = \left\{\left\langle M, w \right\rangle : \text{M stops when running on }
+w\right\}$.
+
+\begin{definition}[Decision TM]
+    A TM M is called a decision machine if the set of final states is $F = \left\{q_{\text{acc}}, q_{\text{rej}
+    }\right\}$.
+\end{definition}
+
+\begin{definition}[Language of a DTM]
+    The language of a decision TM \[
+        L \left(M\right) = \left\{w : \text{M stops in state } q_{\text{acc} } \text{ when run on } w\right\}
+    \]
+    In this case we will say that M accepts $w$. If M stops on $w$ in state $q_{\text{rej} }$ we will say that M rejects
+    $w$.
+\end{definition}
+
+\begin{definition}[Recognition]
+    If $L \left(M\right)= L$, then we will say that M recognises $L$.
+\end{definition}
+
+\begin{theorem}[]
+    There exists a TM that recognises $HALT$.
+\end{theorem}
+
+\begin{definition}[]
+    \[
+        RE = \left\{L : \text{There exists a TM M that recognises L} \right\}
+    \]
+\end{definition}
+
+So we may now instead write the above theorem as
+\begin{theorem}[]
+    \[
+        HALT \in RE
+    \]
+
+    \begin{proof}[Proof ]
+        UTM. We will convert every final state of the UTM to an accepting state. Therefore, if the simulation ends, then
+        the language is accepted in RE, and otherwise it is not.
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[]
+    The TM M \textbf{decides} the language $L$ if $L \left(M\right) = L$, and also stops on \textbf{every} input
+\end{definition}
+
+\begin{theorem}[Halting problem]
+    There is no TM that \textbf{decides} $HALT$:
+\end{theorem}
+
+\begin{definition}[]
+    \[
+        R = \left\{L : \text{There exists a TM that decides } L \right\}
+    \]
+\end{definition}
+
+And so:
+\begin{theorem}[Halting problem]
+    \[
+        HALT \notin R
+    \]
+
+    \begin{proof}[]
+        We will assume w.l.o.g that there exists a TM D that decides $HALT$. We will use it to build the TM E, which
+        given an input $\left\langle M \right\rangle$, runs D on it: \begin{enumerate}
+            \item E will copy the input: $M \to \left\langle M, \left\langle M \right\rangle \right\rangle$
+            \item E will run D as a procedure
+            \item If D returns "yes", then E will enter an infinite loop, and if D returns "no", then E will accept (in
+                short, stops).
+        \end{enumerate}
+        We will run the TM E on the input $\left\langle E \right\rangle$. Will E stop on the input $\left\langle E \right\rangle$? If E stops, then D
+        has returned that E stops, and then E will enter an infinite loop, and will not stop, which is a contradiction.
+        On the other hand, if E does not stop, then D will return that E has not stopped, but then E \textbf{will} stop,
+        which is once again, a contradiction. \\
+        This is a contradiction, and therefore the assumption that D exists is incorrect.
+    \end{proof}
+
+\end{theorem}
+% subsection Does M stop on w? (end)
+
+% section Calling TMs as procedures / functions (end)
+
+\section{Reductions}\label{sec:Reductions} % (fold)
+Let us define \[
+    HALT_\varepsilon = \left\{\left\langle M \right\rangle : \text{M stops on every input } \varepsilon\right\}
+\]
+\begin{theorem}[]
+    \[
+        HALT_\varepsilon \notin R
+    \]
+
+    \begin{proof}[Proof ]
+        We may construct the TM red (contraction of reduction) which operates as follows on the input $\left\langle M, w
+        \right\rangle $: Red will create a description of a TM M', where given an empty input, it prints $w$, and then
+        runs like M. This is to say $\left\langle M, w \right\rangle \to \left\langle M' \right\rangle$.
+
+        Let us assume the contradiction that D is the TM that decides $HALT_\varepsilon$. Given $\left\langle M, w
+        \right\rangle$, we will give them as input to Red, which will then return $\left\langle M' \right\rangle$. This
+        will be given as input to D (as described in halting problem), and returns yes or no. Therefore, the first 3
+        steps decides $HALT$, which is a contradiction, since there is no machine that decides $HALT$.
+    \end{proof}
+\end{theorem}
+% section Reductions (end)
+
+\end{document}

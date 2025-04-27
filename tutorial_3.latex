@@ -147,7 +147,7 @@ So, if we simulate for the word $baabbb$, we get the following: \begin{enumerate
     \item $S = \delta \left(q_0, a\right) = \left\{q_0, q_1\right\}$
     \item $S = \delta \left(q_0, a\right) \cup \delta \left(q_1, a\right) = \left\{q_0, q_1, q_2\right\}$
     \item $S = \delta \left(q_0, q_b\right) \cup \delta \left(q_1, b\right) \cup \delta \left(q_2, b\right) =
-        \left\{q_0, q_1, q_2\right\}$
+        \left\{q_0, q_2, q_3\right\}$
     \item $S = \left\{q_0, q_3\right\}$
     \item $S = \left\{q_0\right\}$
 \end{enumerate}
