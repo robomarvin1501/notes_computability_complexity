@@ -1,0 +1,249 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\C}{\ensuremath{\mathcal{C}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 6}
+\author{Gidon Rosalki}
+\date{2025-05-04}
+
+
+\begin{document}
+\maketitle
+\section{Reminder of languages}\label{sec:Reminder of languages} % (fold)
+We have RE, all the languages recognisable by Turing machines, R, the set of decidable languages by TMs, and REG, all
+the regular languages (recognisable by a DFA). These hold that $REG \subset R \subset RE$. Note that $HALT \in RE$.
+Let us define \begin{align*}
+    CO-RE &= \left\{L : \overline{L} \in RE\right\} \\
+          & \left(\overline{L} = \Sigma^* \setminus L  \gets L \subseteq \Sigma^*\right) \\
+          &= \left\{L : \text{ There exists a TM M that rejects the input } x \Leftrightarrow x \notin L\right\} \\
+\end{align*}
+% section Reminder of languages (end)
+
+Now, is it true that $R \subseteq CO-RE$? IT is true that $R \subset CO-RE$, but is there anything else? Anything that
+is within $RE$, but not R, or anything that is in CO-RE, but not in RE?
+
+\begin{theorem}[]
+    \[
+        RE \cap CO-RE = hR
+    \]
+
+    \begin{proof}[Proof]
+        It is trivial that \[
+            R \subseteq RE \cap CO-RE
+        \]
+        from the previous lecture, so now we simply need to show the other direction: \begin{align*}
+            RE \cap CO-RE \subseteq R
+        \end{align*}
+        Since if $L \in RE \cap CO-RE$, then there is a TM $M_L$ and $M_{\overline{L}}$ the recognise $L$ and
+        $\overline{L}$ accordingly. We may thus build the TM $M_D$ (D for decide), that decides $L$ by given an input
+        $x$, $M_D$ will run $M_L$ and $M_{\overline{L}}$ on $x$ a total of $i$ steps for every $i \in \N$. If $M_L$ will
+        accept or reject, then $M_D$ will accordingly accept / reject, and if $M_{\overline{L}}$ will accept or reject,
+        then $M_D$ will reject / accept accordingly. It is certain that at elast one of these will occur, and thus $M_D$
+        will give the correct response.
+    \end{proof}
+\end{theorem}
+
+Is there a language $L \in CO-RE \setminus RE$? Yes: $\overline{HALT}$. $\overline{HALT} \in CO-RE \setminus RE$, since
+otherwise it would be in $R$, and thus both it and $HALT$ would be decidable, which is a contradiction to the fact that
+they are undecidable.
+
+\section{Reductions}\label{sec:Reductions} % (fold)
+Reductions are translating problems into other problems, and we may use them to say that a given problem is no more
+difficult than a different problem, given a certain function that translates between them. Consider $L \subseteq
+\Sigma^*, L' \subseteq \Gamma^*$, languages,
+and the TM that can recognise $L$, $M$. Thus, with the reduction Red, we can give Red a word $w \in \Sigma^*$, and thus
+recognise whether or not it is in fact in $L'$ through using $M$ upon it. Formally:
+
+\begin{definition}[Reduction]
+    $L \subseteq \Sigma^*, L' \subseteq \Gamma^*$. A reduction machine from $L'$ to $L$ is the TM Red that stops on
+    every input $x \in \Gamma^*$ and returns a word in $\Sigma^*$ such that \[
+        Red \left(x\right) \in L \Leftrightarrow x \in L'
+    \]
+\end{definition}
+If there exists such a TM, then we will say that there exists a reduction from $L'$ to $L$, and we will write \[
+    L' \leq_m L
+\]
+and the function $x \to Red \left(x\right)$ will be called the reduction function from $L'$ to $L$.
+
+\begin{theorem}[Reduction theorem]
+    If $L' \leq_m L$, then all the following are true: \begin{enumerate}
+        \item $L \in R \implies L' \in R$
+        \item $L \in RE \implies L' \in RE$
+        \item $L \in CO-RE \implies L' \in CO-RE$
+    \end{enumerate}
+
+    \begin{proof}[Proof ]
+        Homework (the concept is that if $M$ "solves" $L$, then $M \circ Red$ solves $L'$)
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[$HALT \leq A_{TM}$]
+    Let \[
+        A_{TM} = \left\{\left\langle M, w, rhs \right\rangle : M \text{ accepts } w\right\}
+    \]
+    \begin{proof}[Proof ]
+        The reduction will return, given an input $\left\langle M, w \right\rangle $ a coding $\left\langle M', w
+        \right\rangle $, where $M'$ is a TM that runs like $M$, apart from the fact that $M'$ will also accept, even
+        when $M$ rejects (i.e., $M'$ will accept whenever $M$ stops, thus describing $HALT$). \\
+        Correctness: The described reduction may be described by a TM that always stops.
+        $\left\langle M, w \right\rangle  \in HALT$ \textbf{if and only if} $M$ stops on $w$ \textbf{if and only if}
+        $M'$ accepts $w$ \textbf{if and only if} $\left\langle M', w \right\rangle \in A_{TM}$
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    \[
+        A_{TM} \leq_m HALT
+    \]
+    \begin{proof}[Proof ]
+        Given $\left\langle M, w \right\rangle $, the reduction will return $\left\langle M', w \right\rangle $, where
+        $M'$ is a TM that runs like $M$, however when $M$ rejects, then $M'$ enters an infinite loop. \\
+        Correctness: Computation - trivial, $\left\langle M, w \right\rangle \in A_{TM}$ \textbf{if and only if} $M$
+        accepts $w$ \textbf{if and only if} $M'$ stops (and accepts, not that important) on $w$ \textbf{if and only if}
+        $\left\langle M', w \right\rangle \in HALT$
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    For every language $L \in RE$, it holds that $L \leq_m A_{TM}$
+    \begin{proof}[Proof ]
+        Continued below
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[]
+    If $\C$ is a set of languages, and $L$ is a language such that $L' \leq_m L$, for every $L' \in \C$, then we will
+    say that $L$ is $\C$-hard. If, additionally $L \in \C$, we will say that $L$ is $C$-complete.
+\end{definition}
+
+\begin{theorem}[]
+    $A_{TM}$ is $RE$-complete
+
+    \begin{proof}[Proof ]
+        $A_{TM} \in RE$. It remains to show if $L \in RE$, then $L \leq_m A_{TM}$. For such an $L$, there is a TM $M_L$,
+        that recognises it. Given the input $x$ for $L$, the reduction will return $\left\langle M_L, x \right\rangle $.
+        \\
+        Correctness: Trivial, left as an exercise to the reader.
+    \end{proof}
+\end{theorem}
+
+
+\begin{theorem}[]
+    $\overline{HALT}$ is $CO-RE$ complete
+    \begin{proof}[Proof ]
+        Let there be $L \in CO-RE$. Therefore $\overline{L} \in RE$. Therefore \[
+            \overline{L} \leq_m A_{TM} \leq_m HALT \implies \overline{L} \leq_m HALT \implies L \leq_m \overline{HALT}
+        \]
+    \end{proof}
+\end{theorem}
+
+What words are in $\overline{HALT}$? \[
+    \overline{HALT} = \left\{\left\langle M, w \right\rangle : M \text{ does not stop on } w\right\} \cup E
+\]
+Where $E$ is the set of incorrect inputs (also known as nonsense, or figgldygrak).
+
+\begin{theorem}[]
+    Non-Halt is complete in $CO-RE$
+    \begin{proof}[Proof ]
+        Firstly, is it true that Non-Halt $\in CO-RE$? Well Non-HAlt = Halt $\cup E$, where Halt $\in RE \land E \in
+        RE$. So therefore Non-Halt $\in RE$. We will finish with a reduction from HALT to Non-Halt. Let us create a
+        function such that for the words in $\overline{HALT}$, for those accepted are mapped to being accepted by
+        Non-Halt, for those that are figgldygrak, they are also accepted by Non-Halt, and those rejected by
+        $\overline{HALT}$, they too are rejected by Non-Halt.
+    \end{proof}
+\end{theorem}
+
+Let us define some more languages. Consider \begin{align*}
+    Y-HALT &= \left\{\left\langle M, w \right\rangle, Y : M \text{ stops on } w\right\} \\
+    N-HALT &= \left\{\left\langle M, w \right\rangle, N : M \text{ does not stop on } w\right\} \\
+    NY-HALT &= Y-HALT \cup N-HALT
+\end{align*}
+
+\begin{theorem}[]
+    NY-HALT is both $RE$-hard, and also $CO-RE$-hard.
+    \begin{proof}[Proof RE]
+        We will show a reduction from HALT, since for every other language in RE there is a reduction to HALT, so this
+        is sufficient. Given $\left\langle M, w \right\rangle $, the reduction will return $\left\langle M, w
+        \right\rangle, Y$. The correctness is trivial, and left as an exercise for the reader.
+    \end{proof}
+
+    \begin{proof}[Proof CO-RE]
+        We will create a reduction from Non-Halt, as follows: \[
+            \left\langle M, w \right\rangle \to \left\langle M, w \right\rangle, N
+        \]
+    \end{proof}
+\end{theorem}
+We have thus created a language that is harder than all the languages in RE, and CO-RE. To fully demonstrate this, we
+must show that $NY-HALT \notin RE$. If it were, then from the reduction theorem $Non-Halt \in RE$, but we have already
+shown $Non-Halt \in CO-RE$, and thus $Non-Halt \in RE \cap CO-RE = R$, but this cannot be.
+% section Reductions (end)
+
+\section{Things which we have not the time to study further}\label{sec:Things which we have not the time to study further} % (fold)
+Consider a shape given by a list of corner points. Is it possible to tile a plane, using copies of this shape? Well,
+maybe, this problem is not decidable.
+
+\subsection{The theory of Turing and Church}\label{sub:The theory of Turing and Church} % (fold)
+Every computation machine (in our universe), can be simulated by a Turing Machine.
+% subsection The theory of Turing and Church (end)
+% section Things which we have not the time to study further (end)
+
+\section{Mathematical logic}\label{sec:Mathematical logic} % (fold)
+In 250BC Archimedes established that one can prove geometrical problems by assuming mathematical axioms. In 1880 Frege
+created a system of proofs, where everything is either an axiom, or everything is derived by rules. So, in our language,
+we may state that for all the proofs (that Frege could conceive) proof $\in R$. In 1900 Hilbert asked if it is possible
+to compute mathematics (compute as in TM, not 4 + 5), i.e. if every mathematical proof can be proven using Frege's
+framework. He kept asking, until he asked if you may decide a mathematical theorem by a computation, or in other words,
+if the language of mathematical theorems is in $R$? The answer is no (sadly). We may also ask if every mathematical
+theorem there exists a proof, or disproof. If so, then $CORRECT \in R$, (the collection of correct mathematical
+theorems), which we just stated was not the case. Then came Godel (with answers we don't like), and showed that given \[
+    DECIDABLE = \left\{\text{Theorems that may be proved or disproved}\right\}
+\]
+the following theorem
+\begin{theorem}[]
+    \[
+        DECIDABLE \in RE
+    \]
+    \begin{proof}[Proof ]
+        Let us assume that $T$ is a TM that decides $DECIDABLE$. We will show that this shows that $HALT \in R$. We will
+        build a TM $S$, that works as follows: Given $\left\langle M, w \right\rangle $ $S$ will answer the theorem
+        "$\left\langle M \right\rangle$ does not stop on $\left\langle w \right\rangle$". If $T$ answered "No", then $S$
+        will answer "No". If $T$ answered "yes", then $S$ will run on the proof. \\
+        Since there exists a mathematical proof of the type "$\left\langle M \right\rangle$ does not stop on
+        $\left\langle w \right\rangle$", which is correct, but has no proof.
+    \end{proof}
+\end{theorem}
+% section Mathematical logic (end)
+
+\end{document}
