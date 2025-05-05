@@ -12,7 +12,8 @@
 \usepackage{booktabs}
 \usepackage{float}
 \usepackage{bbm}
-\usepackage{hyperref}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
 \usepackage{tikz}
 \usetikzlibrary{automata, positioning, arrows}
 % \usepackage{stix}
