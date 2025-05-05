@@ -65,7 +65,7 @@ The extended transition function of $A$: $\delta^* : 2^Q \times \Sigma^* \to 2^Q
         \begin{itemize}
             \item $REG \subseteq NREG$: This is true since a DFA is turned into an NFA through a very simple change in
                 minor definitions.
-            \item $NREG \subseteq REG$: Let there be $L \in NREG$, and $A = \left(\Sigma, Q, Q_0, F, \delta\right)$, a
+            \item $NREG \subseteq REG$: Let there be $L \in NREG$, and $A = \left(\Sigma, Q, Q_0, F, \delta\right)$, an
                 NFA that recognises it. We will build an automaton $A_d$ that decides $L$ through $A_d$. We know that
                 $A_d$ has the same alphabet, but what is its states? \\
                 The concept: $A_d$ will have a state for every subset $S \subseteq Q$, when running $A_d$ on w, $A_d$
@@ -76,7 +76,7 @@ The extended transition function of $A$: $\delta^* : 2^Q \times \Sigma^* \to 2^Q
                     \delta_d \left(S, \alpha\right) &= \delta^* \left(S, \alpha\right) \\
                 \end{align*}
                 Our theorem is that $L \left(A_d\right) = L \left(A\right)$, and it is sufficient to show that $\delta^*
-                \left(Q_0, w\right) = \delta^* \left(Q_0, w\right)$, since if we do show this then we get $w \in L
+                \left(Q_0, w\right) = \delta_d^* \left(Q_0, w\right)$, since if we do show this then we get $w \in L
                 \left(A_d\right) \Leftrightarrow \delta^*_d \left(Q_0, w\right) \in F_d \Leftrightarrow \delta^*
                 \left(Q_0, w\right) \in F_d \Leftrightarrow \delta^* \left(Q_0, w\right) \cap F \ne \emptyset
                 \Leftrightarrow w \in L \left(A\right)$. \\
@@ -109,7 +109,7 @@ The NFA
         \node[state, accepting, right of=qkm1] (qk) {$q_{k}$};
 
         \draw   (q0) edge[loop above] node{0, 1} (q0)
-                (q0) edge[->, above] node{0} (q1)
+                (q0) edge[->, above] node{1} (q1)
                 (q1) edge[->, above] node{0, 1} (q2)
                 (q2) edge[->, above] node{0, 1} (dots)
                 (dots) edge[->, above] node{0, 1} (qkm1)
