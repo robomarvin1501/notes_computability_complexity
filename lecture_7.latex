@@ -1,0 +1,356 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 7 - Complexity}
+\author{Gidon Rosalki}
+\date{2025-05-11}
+
+
+\begin{document}
+\maketitle
+If you love definitions, then you are going to enjoy this lecture. One can argue we have finished the "computation" part
+of the course, and we have now reached \textbf{complexity}.
+
+\section{Deterministic Turing Machines}\label{sec:Deterministic Turing Machines} % (fold)
+\subsection{Definitions}\label{sec:Definitions} % (fold)
+\begin{definition}[Complexity]
+    What we can compute in a limited number of computing resources
+\end{definition}
+
+\begin{definition}[Computing resources]
+    We will focus on \textbf{time}, and touch on memory
+\end{definition}
+
+\begin{definition}[Runtime]
+    Given a TM $M$, and an input $w$, the runtime of $M$ on $w$ is the length of the full run of $M$ on $w$ (the series
+    of configurations beginning at the initial configuration), less 1 (due to the starting configuration not being a
+    computation step)
+\end{definition}
+
+\begin{definition}[Space complexity]
+    The number of cells at which the head arrives during the run
+\end{definition}
+
+\begin{definition}[Worst case runtime of M]
+    Given a TM $M$, its runtime will be $T: \N \to \N$, such that \[
+        T \left(n\right) = \displaystyle\max_{\left|w\right| \leq n} \left\{\text{Runtime of } M \text{ on } w\right\}
+    \]
+\end{definition}
+
+\begin{definition}[Worst case space complexity of M]
+    Given a TM $M$, its space complexity will be $S: \N \to \N$, such that \[
+        S \left(n\right) = \displaystyle\max_{\left|w\right| \leq n} \left\{\text{Space complexity of } M \text{ on } w\right\}
+    \]
+\end{definition}
+
+\begin{definition}[]
+    We will say that the TM $M$ runs in time $O \left(f \left(n\right)\right)$ if \[
+        T \left(n\right) = O \left(f \left(n\right)\right)
+    \]
+    We may similarly define all of $\Omega, \omega, \Theta, \theta$ as we saw in DAST, and similarly for space
+    complexity.
+\end{definition}
+
+Until now, everything we have seen is essentially more formal definitions of what we saw in DAST. Gird thy loins, here
+be dragons. \\
+
+\begin{definition}[TIME]
+    Let there be $f: \N \to \N$ be a monotonically increasing function, we will define \[
+        TIME \left(O \left(f \left(n\right)\right)\right) = \left\{L : \text{There exists a TM that decides } L \text{
+        and runs in } O \left(f \left(n\right)\right)\right\}
+    \]
+    Which is to say, the language needs be decidable, and runs in $O \left(f \left(n\right)\right)$
+\end{definition}
+
+\begin{definition}[SPACE]
+    Let there be $f: \N \to \N$ be a monotonically increasing function, we will define \[
+        SPACE \left(O \left(f \left(n\right)\right)\right) = \left\{L : \text{There exists a TM that decides } L \text{
+        with space complexity } O \left(f \left(n\right)\right)\right\}
+    \]
+    Which is to say, the language needs be decidable, with space complexity $O \left(f \left(n\right)\right)$
+\end{definition}
+% section Definitions (end)
+
+\subsection{Examples}\label{sec:Examples} % (fold)
+\begin{example}[INPUT-LENGTH]
+    The TM that finds the length of a given input.
+
+    \begin{proof}[Solution]
+        We saw a method of putting a $\#$ at the end of the input, and a
+        counter after it, and for each letter, we jump to the counter, and increase it, thus requiring $O
+        \left(n^2\right)$. \\
+
+        We could also place the counter to the left of the input, and every time we read a letter from the input, we add
+        1 to the input, and move it right 1. Both these steps require $\log \left(n\right)$, and we carry them both out
+        $n$ times, resulting in $O \left(n \log \left(n\right)\right)$.
+
+        As it transpires, we cannot do better than $O \left(\log \left(n\right)\right)$, but it is very difficult to
+        show this. Quite often we cannot show this, but overall it is complicated to show optimality.
+
+        With regards to space, if the counter overwrites the input, then we will not need more than $O \left(n\right)$
+        space
+    \end{proof}
+\end{example}
+
+\pagebreak
+\begin{example}[$L \in REG$]
+    \begin{proof}[Solution]
+        This takes $O \left(n\right)$, with space complexity of $O \left(n\right)$ as well
+    \end{proof}
+\end{example}
+
+\begin{example}[PALINDROME]
+    \begin{proof}[Solution]
+        We need to perform $\displaystyle\frac{n}{2}$ comparisons, and for each we move $n$ steps to reach the
+        equivalent letter, resulting in $\Theta \left(n^2\right)$ steps, with $O \left(n\right)$ space required.
+
+        If we consider a TM with \textbf{2} heads, then we can in fact perform this in $\Theta \left(n\right)$, since we
+        start the heads at opposite ends of the word, and each step move the left starting head right, and the right
+        starting head left, and perform the comparison. After $n$ steps, both will reach a \textvisiblespace, and the
+        machine will return accept, assuming it hasn't found 2 different letters yet, whereupon it would have already
+        rejected.
+    \end{proof}
+\end{example}
+% section Examples (end)
+
+\subsection{More definitions}\label{sec:More definitions} % (fold)
+\begin{definition}[P]
+    \[
+        \text{P = PTIME = POLYNOMIAL TIME = } \displaystyle\bigcup_{k \in \N}^{}TIME \left(O \left(n^k\right)\right)
+    \]
+    So something that takes $5n^3 + 7 + n^2 = O \left(n^3\right)$, since it is contained within the family that takes $O
+    \left(n^3\right)$
+\end{definition}
+
+\begin{theorem}[Extended Church-Turing theorem]
+    Every computer that can be built in our universe, and runs in $O \left(f \left(n\right)\right)$, may be simulated on
+    a TM, in time $O \left(f \left(n\right)^k\right)$, for some constant $k$. This means that $P$ is not dependent on
+    the computational model.
+\end{theorem}
+
+\begin{definition}[P]
+    \[
+        \text{PSPACE = POLYNOMIAL SPACE = } \displaystyle\bigcup_{k \in \N}^{}SPACE \left(O \left(n^k\right)\right)
+    \]
+\end{definition}
+
+\begin{definition}[E]
+    \[
+        E = \displaystyle\bigcup_{k \in \N}^{}TIME \left(O \left(2^{k \cdot n}\right)\right) = TIME \left(O
+        \left(\left(2^k\right)^n\right)\right)
+    \]
+    We may continue on to $EXP$, which is bigger than $E$ \[
+        EXPTIME = EXP = \displaystyle\bigcup_{k \in \N}^{}TIME \left(O \left(2^{n^k}\right)\right)
+    \]
+
+    The E stands for exponential
+\end{definition}
+% section More definitions (end)
+
+\subsection{Examples}\label{sec:Examples} % (fold)
+\begin{example}[]
+    \[
+        CONNECTED = \left\{\left\langle G \right\rangle : G \text{ is connected} \right\}
+    \]
+    \begin{proof}[Solution]
+        As was discussed in DAST, $CONNECTED \in P$
+    \end{proof}
+\end{example}
+
+\begin{example}[]
+    \[
+        MIN-SPANNING-TREE \in P
+    \]
+    \begin{proof}[Solution]
+        \begin{align*}
+            MIN-SPANNING-TREE \in P = \left\{\left\langle G \right\rangle, \left\langle w \right\rangle,
+            \left(k\right)_b : \text{There exists in } G \text{ a spanning tree whose weight of } w \leq k\right\}
+        \end{align*}
+    \end{proof}
+\end{example}
+
+\begin{example}[]
+    \[
+        SIMP-PATH = \left\{G, k : \text{There exists a simple path of length } k \text{ in } G\right\}
+    \]
+
+    \begin{proof}[Solution]
+        \[
+            SIMP-PATH \in E
+        \]
+        We will pass over $\binom{m}{k} $ k-tuples of edges, and check if there is a path that we want $m = \left|E
+        \left(G\right)\right|$. The runtime will be $\binom{m}{k} \cdot k^2 \leq \binom{n}{k} \leq 2^n \leq 2^{2n}$
+    \end{proof}
+\end{example}
+% section Examples (end)
+
+% section Deterministic Turing Machines (end)
+\section{Non deterministic TMs}\label{sec:Back to definitions} % (fold)
+\begin{definition}[ND-TM]
+    Non deterministic Turing machine: \[
+        \delta \left(q, a\right) \in P \left(Q \times \Gamma \times \left\{R, L\right\}\right)
+    \]
+\end{definition}
+
+\begin{definition}[Partial run]
+    A partial run is a series of configurations where the first is the initial configuration, and all the following
+    configurations are successors of the previous ones.
+\end{definition}
+
+\begin{definition}[Full run]
+    A partial run that is either infinite, or that finishes in a final configuration.
+\end{definition}
+
+\begin{definition}[Runtime of M on w]
+    The length of the longest full run, or $\infty$ is there does not exist such a run.
+\end{definition}
+
+The equivalent definition for space is left as an exercise for Rachel, mobile number +972 58-613-5791 (probably, I have
+not saved her as a contact). Should a reader, who is not Rachel, fail to figure out the definition for themselves, I'm
+sure that she'll be more than happy to help you.
+
+\subsection{Non deterministic time / space complexity sets}\label{sub:Non deterministic time / space complexity sets} % (fold)
+\begin{definition}[]
+    \[
+        NTIME \left(O \left(f \left(n\right)\right)\right) = \left\{L : \text{There exists a ND-TM that
+        \textbf{recognises} } L \text{ and runs in time } O \left(f \left(n\right)\right)\right\}
+    \]
+\end{definition}
+Note, we haven't defined an ND-TM recognising a language, so let's do that now:
+
+\begin{definition}[]
+    An ND-TM accepts the input $w$ if there exists a run that accepts $w$.
+\end{definition}
+
+\begin{definition}[]
+    An ND-TM recognises the language $L$ if it accepts the input $w$ \textbf{if and only if} $w \in L$
+\end{definition}
+% subsection Non deterministic time / space complexity sets (end)
+
+We defined $P$ earlier, so let's extend that
+\begin{definition}[NP]
+    \[
+        NPTIME = NP = \displaystyle\bigcup_{k \in \N}^{}NTIME \left(O \left(n^k\right)\right)
+    \]
+\end{definition}
+
+\begin{definition}[]
+    \[
+        NPSPACE = \displaystyle\bigcup_{k \in \N}^{}NSPACE \left(O \left(n^k\right)\right)
+    \]
+\end{definition}
+
+\begin{definition}[]
+   \[
+        NE = \displaystyle\bigcup_{k \in \N}^{}NTIME \left(O \left(2^{k \cdot n}\right)\right) = NTIME \left(O
+        \left(\left(2^k\right)^n\right)\right)
+   \]
+\end{definition}
+
+\begin{definition}[]
+   \[
+        NEXPTIME = NEXP = \displaystyle\bigcup_{k \in \N}^{}NTIME \left(O \left(2^{n^k}\right)\right)
+   \]
+\end{definition}
+Or in short, everything we defined for the deterministic case, can also be defined for the non deterministic case. It is
+trivial to show that $P \subseteq NP$, and it is left as an exercise to the reader to show that $NP \subseteq P$. Doing
+this will get you both 100\% on the course (and also a million dollars, but really, that's insignificant in comparison).
+
+\subsection{Examples}\label{sub:Examples} % (fold)
+\begin{example}[]
+    \[
+        HAMILTON-PATH = \left\{G : \text{There exists a simple path in } G \text{ of length } \left|V
+        \left(G\right)\right| - 1\right\}
+    \]
+    \begin{proof}[Solution]
+        Let us consider $SIMP-PATH \in NP$. There exists a nondeterministic TM, that runs in polynomial time, and
+        recognises the answer. We will have an encoding on the tape of $\left\langle G \right\rangle \left\langle k
+        \right\rangle$ followed by $k$ question marks. We will have an ND-TM, that goes over each of these question
+        marks, and either replaces them with a 0 or a 1, and moves right each time. When it reaches a space (i.e., the end
+        of the word), it checks if this collection of 0s and 1s is a simple path, and if so, returns accept, otherwise
+        reject. This resolves in polynomial time, and can also solve $HAMILTON-PATH$, ans so there is the answer.
+    \end{proof}
+\end{example}
+
+\begin{example}[CNF-SAT]
+    CNF = Conjunctive Normal Form (not important) \\
+    \textbf{Input}: A boolean function over the polynomial variables $x_1, \dots, x_n$, of the shape \[
+        \psi = C_1 \land C_2 \land \dots \land C_m
+    \]
+    Where $C$ is a clause. For each $C_i$, it holds that \[
+        C_i = \left(X_1 \lor X_2 \lor \overline{X_4} \lor X_7\right)
+    \]
+    An input is in the language if there exists a placement of variables that satisfies $\psi$
+    \begin{proof}[Solution]
+        We want to show that $CNF-SAT \in E$. This holds because there are at most $2^n$ placements. To check each of
+        these it takes much less than exponential time (trivial), and so overall we must check an exponential number of
+        placements, resulting in $CNF-SAT \in E$.
+    \end{proof}
+\end{example}
+% section Non deterministic TMs (end)
+
+\section{NP != P}\label{sec:NP != P} % (fold)
+It's time to use reductions again! Remember \[
+    x \in L' \Leftrightarrow Red \left(x\right) \in L
+\]
+
+\begin{definition}[]
+    A TM is a reduction machine from $L'$ to $L$ if it is a reduction from $L'$ to $L$, and runs in polynomial time, by
+    length of the input. In this case we will write \[
+        L' \leq_p L
+    \]
+\end{definition}
+
+\begin{theorem}[Polynomial reduction theorem]
+    If $L \in P$ and $L' \leq_p L$, then $L' \in P$.
+    \begin{proof}[Proof ]
+        We will not show a full proof, we have already seen similar proofs. \\
+        Let there be $x \in L'$ of length $n$. Then the reduction $Red \left(x\right)$, which runs in $O
+        \left(n^{k_1}\right)$, is at most of length $n^{k_1}$, and $Red \left(x\right) \in L$, so we now run $M \circ
+        Red \left(x\right)$. We know that $M$ runs in $O \left(n^{k_2}\right)$, so running $M \circ Red \left(x\right)$,
+        will take at most $O \left(n^{k_1 \cdot k_2}\right)$, and so $L \in P$
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[]
+    A language $L$ is $C$-hard (C is a set of languages) with respect to a polynomial reduction if for every $L' \in C$,
+    it holds that $L' \leq_p L$. The language is $C$-complete if it is $C$-hard, and also $L \in C$.
+\end{definition}
+It transpires that both SIMP-PATH, and HAMILTON-PATH are both NP-complete.
+% section NP != P (end)
+
+
+\end{document}
