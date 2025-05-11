@@ -57,7 +57,7 @@ is within $RE$, but not R, or anything that is in CO-RE, but not in RE?
 
 \begin{theorem}[]
     \[
-        RE \cap CO-RE = hR
+        RE \cap CO-RE = R
     \]
 
     \begin{proof}[Proof]
@@ -112,7 +112,7 @@ and the function $x \to Red \left(x\right)$ will be called the reduction functio
 
 \begin{theorem}[$HALT \leq A_{TM}$]
     Let \[
-        A_{TM} = \left\{\left\langle M, w, rhs \right\rangle : M \text{ accepts } w\right\}
+        A_{TM} = \left\{\left\langle M, w \right\rangle : M \text{ accepts } w\right\}
     \]
     \begin{proof}[Proof ]
         The reduction will return, given an input $\left\langle M, w \right\rangle $ a coding $\left\langle M', w
