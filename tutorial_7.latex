@@ -1,0 +1,313 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 7}
+\author{Gidon Rosalki}
+\date{2025-05-14}
+
+
+\begin{document}
+\maketitle
+\section{Non deterministic Turing machines}\label{sec:Non deterministic Turing machines} % (fold)
+\begin{definition}[Nondeterministic Turing Machine - NTM]
+    A non-deterministic Turing Machine is a 7-tuple \[
+        M = \left\langle \Sigma, \Gamma, \text{\textvisiblespace}, Q, Q_0, F, \delta \right\rangle
+    \]
+    Where: \begin{itemize}
+        \item $\Sigma$ is a finite alphabet
+        \item $\Gamma$ is a finite tape alphabet, such that $\Sigma \subseteq \Gamma$
+        \item \textvisiblespace $\in \Gamma \setminus \Sigma$ is the blank symbol
+        \item $Q$ is a finite, non empty, set of states
+        \item $Q_0 \subseteq Q$ is the set of initial states
+        \item $F \subseteq Q$ is the set of final states
+        \item $\delta : \left(Q \setminus F\right) \times \Gamma \to 2^{Q \times \Gamma \times \left\{L, R\right\}}$ is
+            the transition function
+    \end{itemize}
+    The transition function δ maps a state and a tape symbol to a set of possible actions, where each action consists of
+    a next state, a symbol to write, and a direction to move the tape head (left or right).
+\end{definition}
+
+\begin{definition}[Acceptance]
+    Let $N$ be an NTM and let $w \in \Sigma^*$. We say that $N$ accepts $w$ if there exists at least one accepting run
+    of $N$ on $w$ - that is, a run that ends in $q_{\text{acc} }$. In this case, we write $w \in L \left(N\right)$.
+\end{definition}
+
+\begin{example}[CLIQUE]
+    Let $G = \left(V, E\right)$ be a graph. A \textbf{clique} is a set $S \subseteq V$uch that there is an edge between
+    every pair of vertices in $S$. Define the following decision problem: \[
+        CLIQUE = \left\{\left\langle G, k \right\rangle : \text{There is a clique of size } k \text{ in } G\right\}
+    \]
+
+    \begin{proof}[Solution]
+        We will describe an NTM that decides $CLIQUE$. The machine non-deterministically writes on the tape the names of
+        $k$ distinct vertices from $V$, separated by $\#$. This guessing is done by replacing a blank section of the
+        tape with symbols from the encoding of vertex names, one at a time, using non-deterministic transitions. Then,
+        the machine checks deterministically whether all $\binom{k}{2} $ pairs among the chosen vertices are connected
+        by edges in G. For each pair, it searches through the encoding of E to see if the corresponding edge exists. \\
+        If all pairs are connected, then the machine accepts, otherwise it rejects. \\
+        This machine runs in non-deterministic, polynomial time. Guessing the $k$ vertex names takes polynomial time,
+        since $k \leq \left|V\right|$. Checking all $\binom{k}{2} $ pairs for the existence of pairs takes polynomial
+        time, by scanning the input encoding of $G$. Therefore, $CLIQUE$ can be solved by an NTM in polynomial time.
+    \end{proof}
+\end{example}
+
+We shall however note, that a trivial deterministic algorithm would try all subsets of $k$ vertices and check if any of
+them forms a clique. However, the number of such subsets is $\binom{\left|V\right|}{k}$, which is exponential in the
+input size when $k$ is not a constant because: \[
+    \binom{\left|V\right|}{\frac{\left|V\right|}{2}} \approx 2^{\left|V\right|}
+\]
+Since each check takes polynomial time but must be repeated exponentially many times, this yields an exponential-
+time algorithm overall. Thus, the trivial approach does not give a polynomial-time solution.
+% section Non deterministic Turing machines (end)
+
+\section{P and NP}\label{sec:P and NP} % (fold)
+\begin{definition}[Runtime of a TM]
+    The \textbf{runtime} of a TM $M$ on an input $w \in \Sigma^*$ is the number of steps that $M$ performs before it
+    halts.
+\end{definition}
+
+\begin{definition}[Runtime of an NTM]
+    The \textbf{runtime} of an NTM $N$ on an input $w \in \Sigma^*$, is the number of steps that $N$ performs, before
+    halting, in the longest run on $w$.  \[
+        runtime_N \left(w\right) = \displaystyle\max_{} \left\{\left|r\right| : r \text{is a run of } N \text{ on } w\right\}
+    \]
+\end{definition}
+
+\begin{definition}[Runtime complexity]
+    For $f: \N \to \N$, we say that a TM/NTM $T$ runs in time $O \left(f \left(n\right)\right)$ if \[
+        \forall w \in \Sigma^*\ runtime_T \left(w\right) \in O \left(f \left|w\right|\right)
+    \]
+\end{definition}
+
+\begin{definition}[]
+    For $f: \N \to \N$, \begin{align*}
+        TIME \left(f \left(n\right)\right) &= \left\{L \subseteq \Sigma^* : L \text{ can be decided by a TM that runs in
+        } O \left(f \left(n\right)\right)\right\} \\
+        NTIME \left(f \left(n\right)\right) &= \left\{L \subseteq \Sigma^* : L \text{ can be recognised by an NTM that
+        runs in } O \left(f \left(n\right)\right)\right\}
+    \end{align*}
+\end{definition}
+
+\begin{definition}[P/NP]
+    The class of languages that can be decided in polynomial time, by the relevant TM/NTM: \begin{gather*}
+        P = \displaystyle\bigcup_{k = 1}^{\infty}TIME \left(n^k\right) \\
+        NP = \displaystyle\bigcup_{k = 1}^{\infty}NTIME \left(n^k\right)
+    \end{gather*}
+\end{definition}
+There is of course, the million dollar question, does $P = NP$? The proof is left as an exercise for the reader (note,
+finding a proof, or disproof, will result in getting 100\% in the course, and a million dollars, but that is far less
+interesting).
+
+\begin{definition}[EXP]
+    The class of languages that can be decided in exponential time by a TM \[
+        EXP = \displaystyle\bigcup_{k = 1}^{\infty} \left(2^{n^k}\right)
+    \]
+\end{definition}
+
+If a language can be decided by a TM that runs in polynomial or exponential time, then in particular it is decidable.
+Therefore it follows easily from the definition that $P, EXP \subseteq R$. Moreover, in the next homework we will show
+that $NP \subseteq EXP$, (by describing a TM that simulates all possible runs of the NTM), thus also $NP \subseteq R$
+
+\subsection{Closure properties of P/NP}\label{sub:Closure properties of P/NP} % (fold)
+\begin{theorem}[$P$ is closed under union]
+    $P$ is closed under union:
+    \begin{proof}[Proof ]
+        Let $L_1, L_2 \in P$. Then there are 2 TMs, $M_1, M_2$, that decide $L_1, L_2$ respectively, and run in
+        polynomial time. Let us define a new TM $M$, which operates as follows on the input $x \in \Sigma^*$: \begin{itemize}
+            \item Run $M_1$ on $x$, and accept if it accepts
+            \item Run $M_2$ on $x$, and accept if it accepts
+            \item If neither accepted, then reject
+        \end{itemize}
+        The proof that $L \left(M\right) = L_1 \cup L_2$ is identical to the case of union in $R$ (shown in a previous
+        recitation). The runtime of $M_1$ and $M_2$ is polynomial, so the sum is also polynomial.  \\
+        We will also note that during the run of $M_1$ on $x$, the machine $M$ must keep a copy of $x$ for later (to
+        clean up the tape for $M_2$). This involves overhead: after each step that $M_1$ performs, $M$ may have to move
+        the copy. The cost is polynomial in $\left|x\right|$, per step. So the overall runtime of M is also polynomial.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[NP is closed under union]
+    NP is closed under union
+    \begin{proof}[Proof ]
+        Let $L_1, L_2 \in NP$. Then there are 2 TMs, $N_1, N_2$, that recognise $L_1, L_2$ respectively, and run in
+        polynomial time. Let us define a new TM $N$, which recognises $L_1 \cup L_2$ as follows: \begin{itemize}
+            \item On the input $w$, $N$ will choose non-deterministically whether to simulate $N_1$ or $N_2$
+            \item It then simulates the chosen machine on input $w$
+            \item If the simulation accepts, then $N$ accepts, otherwise it rejects
+        \end{itemize}
+
+        Since both $N_1$ and $N_2$ run in polynomial time, and the non-deterministic choice adds only a constant
+        overhead, the machine N also runs in non-deterministic polynomial time (The maximum of the time of $N_1$ and
+        $N_2$). \\
+        Moreover, $N$ accepts $w$ \textbf{if and only if}  $w \in L_1 \lor w \in L_2$, so $L \left(N\right) = L_1 \cup
+        L_2 \in NP$
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[P is closed under complement]
+    \begin{proof}[Proof ]
+        Let $L \in P$, and let $M$ be a deterministic TM that decides $L$ in polynomial time. We shall construct a
+        machine $M'$ by swapping the accepting and rejecting states of $M$. Since this transformation only modifies the
+        final states and leaves the computation unchanged, $M'$ still runs in polynomial time and decides the complement
+        language $L$. Hence, $L \in P$.
+    \end{proof}
+\end{theorem}
+
+This proof does not extend to NP. Consider CLIQUE, and now consider the complement language \[
+    \overline{CLIQUE} = \left\{\left\langle G, k \right\rangle : \text{Every size } k \text{ subsets of vertices is not
+    a clique} \right\}
+\]
+To decide this language, we must confirm that \textbf{no} subset of size $k$ forms a clique. A non-deterministic machine
+cannot verify this efficiently: it can guess a subset and reject if it is a clique, but if it guesses a non-clique, that
+tells us nothing about the existence of a different subset that might be a clique. Thus, flipping accept and reject
+states of the non-deterministic machine for $CLIQUE$ does not yield a valid machine for $\overline{CLIQUE}$, since
+rejection does not mean "no" in the presence of non-determinism. In fact, it is currently unknown whether NP is closed
+under complement; that is, whether $NP = coNP$ remains an open question.
+% subsection Closure properties of P/NP (end)
+% section P and NP (end)
+
+\section{Graph problems}\label{sec:Graph problems} % (fold)
+We shall encode graphs as follows: For a graph $G = \left(V, E\right)$, we denote by $\left\langle G \right\rangle$ its
+encoding as a word over $\left\{0, 1, \#\right\}$. It contains a binary name for each vertex in $V$ , and a pair of such
+names for each edge in $E$. Notice that this encoding is the same size as the graph $\left|V\right| + \left|E\right|$
+(up to a polynomial).
+
+\begin{example}[]
+    Let $L = \left\{\left\langle G \right\rangle : G \text{ is a connected graph} \right\}$. We will show that $L \in P$
+    (remember, we did this in DAST using DFS).
+    \begin{proof}[Solution]
+        \begin{itemize}
+            \item Choose an arbitrary vertex $v_0 \in V$
+            \item Perform DFS starting at $v_0$
+            \item If all vertices are visited, then the graph is connected, otherwise it is not
+        \end{itemize}
+        The time complexity taught in DAST was $O \left(\left|V\right| + \left|E\right|\right)$. This does not hold for
+        TMs, since every iteration (checking whether or not a node has been visited, and finding its neighbours),
+        requires scanning the tape several times. The TM is not as efficient, but, importantly, the difference in
+        efficiency is polynomial. This is because the main difference between TMs and the model we are used to (random
+        access memory) is that the TM cannot "jump" to a memory cell, so we pay a (polynomial) price in time per step.
+    \end{proof}
+\end{example}
+
+There are many important decision problems in graph theory, for example: \begin{itemize}
+    \item An \textbf{independent set} in a graph $G = \left(V, E\right)$ is a subset $S \subseteq V$ such that no two
+        vertices in $S$ are connected by an edge
+    \item A \textbf{Hamiltonian path} is a path that visits every vertex in a graph \textit{exactly once}.
+\end{itemize}
+From these, we can define the following decision problems: \begin{gather*}
+    IS = \left\{\left\langle G, k \right\rangle : \text{There is an independent set of size } k \text{ in } G\right\} \\
+    HAM-PATH = \left\{\left\langle G \right\rangle : \text{There is a Hamiltonian path in } G\right\}
+\end{gather*}
+A natural question arises: which of these problems are in P , and which are in NP? How can we formally compare the
+complexity of such problems? \\
+To answer this, we introduce the notion of polynomial-time reductions, which help us classify problems, and understand
+the relationships between them within the complexity hierarchy.
+% section Graph problems (end)
+
+\section{Polynomial reductions}\label{sec:Polynomial reductions} % (fold)
+\begin{definition}[Computable in polynomial time]
+    A function $f: \Sigma^* \to \Sigma^*$ is computable in polynomial time if there exists a TM $M_f$ that runs in
+    polynomial time, and for every input $x \in \Sigma^*$, when $M_f$ halts, the word $f \left(x\right)$ is written to
+    the tape
+\end{definition}
+
+\begin{definition}[Polynomial reduction]
+    A polynomial reduction from a language $A \subseteq \Sigma^*$ to a language $A \subseteq \Sigma^*$ is a function $f
+    : \Sigma^* \to \Sigma^*$ from $A$ to $B$ that is computable in polynomial time. If such a reduction exists, we
+    denote $A \leq_p B$.
+\end{definition}
+
+A big reason we introduced reductions was for the reduction theorem, so let us extend it to this set of definitions:
+
+\begin{theorem}[Reduction theorem for P]
+    If $A \leq_p B$, and $B \in P$, then $A \in P$
+    \begin{proof}[Proof ]
+        Suppose $A \leq_p B$. There is a TM $M_f$ that computes the reduction in polynomial time. Since $B \in P$, there
+        is some TM $M_B$ that decides $B$ in polynomial time. We define $M_A$ which runs as follows on input $x \in
+        \Sigma^*$: \begin{itemize}
+            \item Run $M_f$ on $x$ to obtain $f \left(x\right)$
+            \item Run $M_B$ on $f \left(x\right)$, and accept or reject accordingly
+        \end{itemize}
+        Correctness is the same as the reduction theorem for mapping reductions. It remains to prove that this algorithm
+        indeed runs in polynomial time. \\
+        The output of $M_f \left(x\right)$ is of length $O \left(\left|x\right|^k\right)$ for some constant $k$, and the
+        runtime of $M_B$ on an input of size $O \left(\left|x\right|^k\right)$ is $O
+        \left(\left(\left|x\right|^k\right)^m\right)$ for some constant $m$. Therefore the running time is $O
+        \left(\left|x\right|^{mk}\right)$, which is polynomial in $\left|x\right|$.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    Consider the languages \begin{align*}
+        CLIQUE &= \left\{\left\langle G, k \right\rangle : \text{There is a clique of size } k \text{ in } G\right\} \\
+        IS &= \left\{\left\langle G, k \right\rangle : \text{There is an independent set of size } k \text{ in } G\right\} \\
+    \end{align*}
+    Prove that $CLIQUE \leq_p IS$
+    \begin{proof}[Proof ]
+        The idea is that cliques, and independent sets are complementary: we can convert between them by complementing
+        the graph.
+        \begin{itemize}
+            \item Construction: Let $f \left(\left\langle G, k \right\rangle\right) = \left\langle \overline{G}, k
+                \right\rangle$, where $\overline{G}$ is obtained from $G$ by removing the edges, and then adding edges
+                between vertices that were not connected before, or formally: $\overline{G} = \left(V,
+                \overline{E}\right)$ where \[
+                    \overline{E} = \left\{\left\{u, v\right\} :  u \ne v \in G \land \left\{u, v\right\} \notin E\right\}
+                \]
+            \item Correctness: \begin{itemize}
+                    \item Suppose $\left\langle G, k \right\rangle \in CLIQUE$. Then there is some set of vertices $S$ of
+                        size $k$ such that there is an edge between every two vertices in $S$. By definition of $G$, there
+                        are no edges at all between the vertices in $S$ in $G$, so it is an independent set of size $k$ and
+                        we have $\left\langle G, k \right\rangle \in IS$
+                    \item Suppose $\left\langle \overline{G}, k \right\rangle \in IS$. Then there exists a set $S \subseteq
+                        V$ of size $k$ such that there are no edges between any two vertices in $S$. Thus $S$ is a clique in
+                        $G$, so $\left\langle G, k \right\rangle \in CLIQUE$
+                \end{itemize}
+            \item Complexity: A TM can iterate over every $\left\{u, v\right\} \in V \times V$ , check if it’s in $E$
+                and add or not add it to $G$ accordingly. There are $O \left(\left|V\right|^2\right)$ pairs to check,
+                and each takes polynomial time (we iterate over the edges of $G$ and perform string comparisons). Thus
+                the reduction can be computed in polynomial time
+        \end{itemize}
+    \end{proof}
+\end{theorem}
+
+We don’t know whether $CLIQUE$ and $IS$ are in $P$ or not. However now we know that if $IS \in P$ then $CLIQUE \in P$.
+There is also a polynomial reduction in the other direction (see exercise 7). So they "go together": either both are in
+$P$ or both are not in $P$. We will see that this situation applies to many other problems.
+
+% section Polynomial reductions (end)
+
+
+\end{document}
