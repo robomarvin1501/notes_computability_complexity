@@ -177,13 +177,13 @@ therefore $P = NP$.
 \subsection{3SAT}\label{sub:3SAT} % (fold)
 
 A first example of an NPC language: \[
-    3SAT = \left\{\phi : \phi \text{ is a 3CNF expression, and also } \phi \text{ satisfies} \right\}
+    3SAT = \left\{\varphi : \varphi \text{ is a 3CNF expression, and also } \varphi \text{ satisfies} \right\}
 \]
 Reminder: A boolean expression will be called CNF if it is of the following structure: Constructed from statements, and
 within each statement is boolean variables separated by logical ors. Between each statement, are logical ands. An
 expression will be called 3CNF if in each statement there are exactly 3 literals, which is to say 3 variables. An
-expression $\phi$ will be called satisfying \textbf{if and only if} there is a placement that satisfies the variables, which
-is to say, a placement of the values True or false on teh variables such that the overall result of $\phi$ is true.
+expression $\varphi$ will be called satisfying \textbf{if and only if} there is a placement that satisfies the variables, which
+is to say, a placement of the values True or false on teh variables such that the overall result of $\varphi$ is true.
 
 \begin{theorem}[]
     \[
@@ -195,7 +195,7 @@ is to say, a placement of the values True or false on teh variables such that th
                 We will show that $3SAT \in NP$, which is to say, to show that there exists a polynomial DTM that
                 decides 3SAT. The machine $M$: \begin{itemize}
                     \item Will produce an expression of the structure 3CNF (easy)
-                    \item Will guess a placement, and verify that the placement satisfies $\phi$
+                    \item Will guess a placement, and verify that the placement satisfies $\varphi$
                 \end{itemize}
                 The runtime is polynomial, for obvious reasons. The correctness follows from if the placement satisfies,
                 then there is a run that accepts, and if not, then there is not.
@@ -241,21 +241,21 @@ connected by an edge.
                 conclude that $\forall L' \in NP,\ L' \leq_p CLIQUE$, which is to say $CLIQUE \in NPH$. We need to show
                 that $3SAT \leq_p CLIQUE$: This is to say that there exists a function $f$, and a TM $M_f$, such that
                 $M_f$ computes $f$, in polynomial time, and also $f$ is a reduction function, which is to say \[
-                    \phi \in 3SAT \Leftrightarrow f \left(\phi\right) \in CLIQUE
+                    \varphi \in 3SAT \Leftrightarrow f \left(\varphi\right) \in CLIQUE
                 \]
-                where $f \left(\phi\right) = \left(G, k\right)$. So \[
-                    \phi \text{ is 3CNF satisfiable} \Leftrightarrow G \text{ has a CLIQUE of size } k
+                where $f \left(\varphi\right) = \left(G, k\right)$. So \[
+                    \varphi \text{ is 3CNF satisfiable} \Leftrightarrow G \text{ has a CLIQUE of size } k
                 \]
-                Construction: Given a statement $\phi$, the machine $M_f$ will run as follows: \begin{enumerate}
-                    \item Check if $\phi$ is of the structure $3CNF$ (easy). If not, return $\left(G, k\right) \notin
+                Construction: Given a statement $\varphi$, the machine $M_f$ will run as follows: \begin{enumerate}
+                    \item Check if $\varphi$ is of the structure $3CNF$ (easy). If not, return $\left(G, k\right) \notin
                         CLIQUE$, for example, $G$ has 3 nodes, $k = 100$.
-                    \item W.l.o.g. $\phi$ is of the structure $3CNF$. $M_f$ will run as follows: For all statements in
-                        $\phi$, we will define 7 nodes, one for every placement that satisfies the statement. Between
+                    \item W.l.o.g. $\varphi$ is of the structure $3CNF$. $M_f$ will run as follows: For all statements in
+                        $\varphi$, we will define 7 nodes, one for every placement that satisfies the statement. Between
                         every pair of nodes, $M_f$ will make a connection, aside from when they are related to a shared
-                        variable, and do not agree on its placement. $k$ will be the number of statements in $\phi$. \\
+                        variable, and do not agree on its placement. $k$ will be the number of statements in $\varphi$. \\
                 \end{enumerate}
                         Example: \[
-                            \phi = \left(x_1 \lor \overline{x_2} \lor x_3\right) \land \left(x_1 \lor \overline{x_3}
+                            \varphi = \left(x_1 \lor \overline{x_2} \lor x_3\right) \land \left(x_1 \lor \overline{x_3}
                             \lor \overline{x_4}\right)
                         \]
 \begin{center}
@@ -283,18 +283,18 @@ connected by an edge.
     \end{tikzpicture} \\
 \end{center}
                         Filling out the rest of the edges is left as an exercise for the reader. We create a graph, 7
-                        wide, and $m$, the number of statements in $\phi$, deep.
+                        wide, and $m$, the number of statements in $\varphi$, deep.
 
-                        Runtime: Creating edges: This is polynomial in $\phi$, since there are $7m$ edges, and $m <
-                        \left|\phi\right|$. Connecting the edges: This needs to pass over every pair of edges $O
+                        Runtime: Creating edges: This is polynomial in $\varphi$, since there are $7m$ edges, and $m <
+                        \left|\varphi\right|$. Connecting the edges: This needs to pass over every pair of edges $O
                         \left(\left(7m\right)^2\right)$, which is to say $O \left(m^2\right)$, and for every pair we need
                         to check: If we do not have shared variables, we make an edge. If we do have shared variables,
                         and we give the shared variables equivalent values, we will connect an edge, and otherwise will
-                        not. This takes $O \left(\left|\phi\right|\right)$ for every pair, and we thus have an overall
-                        runtime of $O \left(\left|\phi\right|^3\right)$. \\
-                        Correctness: We need to show that if $\phi \in 3SAT$, then $\left(G, k\right) \in CLIQUE$. This
-                        is to say if $\phi$ is a satisfying $3SAT$ statement, then $G$ contains a CLIQUE of size $k$..
-                        We will look at a placement A that satisfies $\phi$. For every statement, we will choose a node
+                        not. This takes $O \left(\left|\varphi\right|\right)$ for every pair, and we thus have an overall
+                        runtime of $O \left(\left|\varphi\right|^3\right)$. \\
+                        Correctness: We need to show that if $\varphi \in 3SAT$, then $\left(G, k\right) \in CLIQUE$. This
+                        is to say if $\varphi$ is a satisfying $3SAT$ statement, then $G$ contains a CLIQUE of size $k$..
+                        We will look at a placement A that satisfies $\varphi$. For every statement, we will choose a node
                         (from the 7-tuple), that is suitable to the placement that agrees with $A$. We will note that
                         $A$ is a satisfying placement, and therefore is relevant to precisely  1 node of all the
                         7-tuple. We shall theorise that the set $S$ of nodes that we chose is a clique in $G$, of size
@@ -305,7 +305,7 @@ connected by an edge.
                         statement is related to the general placement $A$, then they satisfy the placement for shared
                         variables, which is to say, according to the construction, there is an edge between the pair of
                         nodes. \\
-                        Let us consider the other direction: If $\left(G, k\right) \in CLIQUE$, then $\phi \in 3SAT$. We
+                        Let us consider the other direction: If $\left(G, k\right) \in CLIQUE$, then $\varphi \in 3SAT$. We
                         will look at the subset $S$ of nodes, which is a clique in $G$ of size $k$. We will note that
                         $S$ necessarily contains a single node from each layer. It cannot be more than 1 since in each
                         layer there are no edges, and $S$ is a clique. It cannot be less than 1, since the size of the
@@ -315,8 +315,8 @@ connected by an edge.
                         $S$ is a clique, which is to say they are connected by an edge, and therefore we have received a
                         a placement for all the variables. Additionally, every node is relevant to a placement according
                         to the statement that satisfies it, and since there is in $S$ a node in every layer, the
-                        placement $A$ satisfies all the statements, which is to say, it satisfies $\phi$, which is to
-                        say that $\phi \in 3SAT$.
+                        placement $A$ satisfies all the statements, which is to say, it satisfies $\varphi$, which is to
+                        say that $\varphi \in 3SAT$.
         \end{itemize}
     \end{proof}
 \end{theorem}
