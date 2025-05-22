@@ -46,7 +46,7 @@
 Some of these concepts will only be defined further in the course, since in
 order to learn them you need to complete the course. Such is life.
 
-Definitions: A clicker is a collection of nodes in a graph where there is an
+Definitions: A clique is a collection of nodes in a graph where there is an
 edge between every pair of nodes.
 
 Computational tasks: Examples \begin{enumerate}
