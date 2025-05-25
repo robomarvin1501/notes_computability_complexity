@@ -1,0 +1,237 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 9}
+\author{Gidon Rosalki}
+\date{2025-05-25}
+
+
+\begin{document}
+\maketitle
+\section{Overview}\label{sec:Overview} % (fold)
+\begin{theorem}[Cook-Levin Theorem]
+    \[
+        SAT \in NPC
+    \]
+\end{theorem}
+
+\begin{theorem}[]
+    Both definitions of NP are equivalent.
+\end{theorem}
+% section Overview (end)
+
+\section{Cook Levin}\label{sec:Cook Levin} % (fold)
+Let us recall that \[
+    SAT = \left\{\varphi : \text{There is a CNF formula that satisfies $\varphi$, which is to say $\varphi$ is a boolean formula,
+    constructed from literals, which  all contain variables, conjoined by logical ors, and each literal is connected by
+logical ands} \right\}
+\]
+We have shown previously that $SAT \in NP,\ SAT \leq_p 3SAT$, and therefore $SAT \in NPC \implies 3SAT \in NPC$. We need
+to show that for every $L \in NP$, $L \leq_p SAT$. To do this, we need a function, that translates from $w$ to
+$\varphi$, such that \[
+    w \in L \Leftrightarrow \varphi \in SAT
+\]
+The problem is we know not what is $L$. All that we know is that $L \in NP$, which is to say that there is a TM $M$, non
+deterministic and polynomial that recognises $L$. \\
+Be warned, this is a \textit{long} proof, we are going to spend about 1 to 2 hours on it. There are harder proofs that
+we have seen, and that we will see, but this is long, with a great many parts. \\
+
+\subsection{Configuration reminder}\label{sub:Configuration reminder} % (fold)
+\begin{definition}[Configuration]
+    A configuration is a description of the overall state during a run, or formally: \[
+        c = u q v : u, v \in \Gamma^* \land q \in Q
+    \]
+    The configuration $c$ describes the general state where the internal state of the machine is $q$, the contents of the
+    tape is $uv$, and the head is pointed at the first letter of $v$.
+\end{definition}
+For example, the initial configuration of the run $M \left(w\right)$ is \[
+    c_0 = q_0 w
+\]
+
+An accepting configuration is a configuration that contains the state $q_{\text{acc} }$, and a rejection configuration
+is a configuration that contains the state $q_{\text{rej} }$.
+% subsection Configuration reminder (end)
+
+\subsection{Sub theorem}\label{sub:Sub theorem} % (fold)
+\begin{theorem}[]
+    W.l.o.g. The machine $M$ has a single accepting configuration.
+    \begin{proof}[Proof ]
+        We will show how to change $M$ such that it will have a single accepting configuration, and the runtime will
+        remain polynomial. We will change every state $q_{\text{acc} }$ to $q_{\text{almost accept}} $, and in this
+        state $M$ will delete the whole tape, and return the head to the beginning of the tape, and move to state
+        $q_{\text{acc} }$. It is clear that there is now only a single accepting state, and additionally we will note
+        that the runtime is extended by at most a polynomial of the length of the input, since the tape that we need to
+        delete contained at most a polynomial number of cells.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    W.l.o.g. The machine $M$ only has a single rejecting configuration
+    \begin{proof}[Proof ]
+        Similar to the previous proof.
+    \end{proof}
+\end{theorem}
+% subsection Sub theorem (end)
+
+\subsection{Table construction}\label{sub:Table construction} % (fold)
+We will create a run of $M \left(w\right)$ by using a table, where every row of the table is matched to a configuration,
+starting from row 0 representing the configuration $c_0$. A run will match to a correct filling of the table, and if the
+final row is an accepting configuration, then the run accepts. \\
+We will build a formula that checks if the filling of the table is correct, and if it finishes in an accepting
+configuration. So, we have a table, with $t + 1$ rows, starting at the initial configuration $c_0$, and running until
+$c_t$, where \[
+    t = poly \left(n\right) : n = \left|w\right|
+\]
+We also know that the width of the table, which represents the space used, is also limited in size by $t$, for similar
+reasoning. Every cell within the table will contain a letter from $\Gamma \cup Q$. The height of the table $t$ is bound
+by the runtime, and the width of the table is bound by the length of the longest configuration, which is to say is bound
+by the space, and is therefore also bound by $t$. \\
+Filling the table is correct if: \begin{itemize}
+    \item In row 0 we have the starting configuration
+    \item In row $t$ we have a final configuration, (accepting if the run accepts)
+    \item For all $0 \leq i < t$ it holds that $c_i, c_{i + 1}$ are following configurations, which is to say are
+        suitable to a possible step in the run of $M$. This is to say that $c_i, c_{i + 1}$ are equivalent in almost
+        every place, aside from around the location of the head of the machine, and there the differences need to come
+        from the function $\delta$ of $M$
+\end{itemize}
+So in the first row, which represents $c_0$, we expect to see $q_0$ in the first cell, the letters of the word, and then
+the rest of the row filled with \textvisiblespace. In the bottom row, $c_t$, we expect to see $q_{\text{acc} }$ (if the
+run accepts), followed by \textvisiblespace for the rest of the row. \\
+The immediate location surrounding the head, if the head is at $c_{i,j}$, then it is all the cells in $i, i + 1$, and in
+$j - 1, j, j + 1$, since those are all the cells that can be changed by the machine, and to which the head can move.
+% subsection Table construction (end)
+The main concept is now understood, so it remains to show: \begin{enumerate}
+    \item How to formalise all the checks: \begin{itemize}
+            \item Of the 0th row
+            \item Of the $t$th row
+            \item Of all the collections of 6 boxes (the immediate surroundings of the head between $c_i$ and $c_{i + 1}$
+        \end{itemize}
+    \item How to convert all the above to CNF literals, and in particular into boolean variables
+    \item How to create a CNF formula using a TM $M'$ which is deterministic, and polynomial
+    \item To prove correctness, and runtime
+\end{enumerate}
+
+\subsection{Building and checking correctness for filling the table}\label{sub:Building and checking correctness for filling the table} % (fold)
+We will call the cells in the table $x_{i,j}$, where $x_{0,0}$ is the upmost, and leftmost cell, and $x_{t,t}$ is the
+rightmost, bottom cell. \\
+\subsubsection{Checking row 0}\label{sec:Checking row 0} % (fold)
+So we want to check \[
+    \varphi_{\text{init}} \left(x_{0,0}, x_{0,1}, \dots, x_{0, t}\right) = \left(x_{0,0} = q_0\right) \land
+    \displaystyle\land_{j = 1}^n \left(x_{0,j} = w_j\right) \land \displaystyle\land_{j = n + 1}^t \left(x_{0, j} =
+    \text{\textvisiblespace} \right)
+\]
+We will note that if next every cell is translated to a CNF formula, then $\varphi_{\text{init}}$ will be a CNF formula
+% subsubsection Checking row 0 (end)
+
+\pagebreak
+\subsubsection{checking row t}\label{sec:checking row t} % (fold)
+\[
+    \varphi_{\text{acc} } \left(x_{t, 0}, \dots, x_{t, t}\right) = \left(x_{t, 0} = q_{\text{acc} }\right) \land
+    \land_{j = 1}^t \left(x_{t, j} = \text{\textvisiblespace} \right)
+\]
+% subsubsection checking row t (end)
+
+We want a way to show that 2 continuous rows are suitable to 2 continuous configurations, or rather a correct filling
+for a group of 6 cells is $\forall a, b, c \in \Gamma$: \begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+         a & b & c \\ \hline
+         a & b & c \\ \hline
+     \end{tabular}
+     \caption{6 collection in table}
+\end{table}
+What are the correct ways to fill the 6 cell grouping when the area undergoes a change? We will look at the function
+$\left(q_2, b, R\right) \in \delta \left(q_1, a\right)$
+\begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+         $q_1$ & a & c \\ \hline
+         b & $q_2$ & c \\ \hline
+     \end{tabular}
+     \caption{Possible filling, $\forall c \in \Gamma$}
+\end{table}
+
+\begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+         c & $q_1$ & a \\ \hline
+         c & b & $q_2$ \\ \hline
+     \end{tabular}
+     \caption{Possible filling $\forall c \in \Gamma$}
+\end{table}
+
+
+\begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+         d & c & $q_1$ \\ \hline
+         d & c & b \\ \hline
+     \end{tabular}
+     \caption{Possible filling $\forall c, d \in \Gamma$}
+\end{table}
+where here we have $a$, and $q_2$ off the rights of the top and bottom rows, accordingly.
+
+\begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+         a & c & d \\ \hline
+         $q_2$ & c & d \\ \hline
+     \end{tabular}
+     \caption{Possible filling $\forall c, d \in \Gamma$}
+\end{table}
+where we have $q_1$ and $b$ off the left of the top and bottom rows, accordingly. \\
+We may similarly add checks for all the correct fillings of this group of 6, where the instruction finishes with an
+order to move to the right. \\
+We will define a check for the 6 cells \[
+    \varphi_{\text{legal} }^{i,j} \left(x_{i, j}, x_{i, j+ 1}, x_{i, j + 2}, x_{i + 1, j}, x_{i + 1, j+ 1}, x_{i + 1, j + 2}\right)
+\]
+where we check if the filling is correct according to at least one of the options that we described before. \[
+    \varphi = \varphi_{\text{init}} \land \varphi_{\text{acc} } \land \land_{i = 0}^t \land_{j = 1}^t
+    \varphi_{\text{legal}}^{i,j}
+\]
+% subsection Building and checking correctness for filling the table (end)
+
+
+
+% section Cook Levin (end)
+
+
+\end{document}
