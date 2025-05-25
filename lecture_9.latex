@@ -227,6 +227,56 @@ where we check if the filling is correct according to at least one of the option
     \varphi = \varphi_{\text{init}} \land \varphi_{\text{acc} } \land \land_{i = 0}^t \land_{j = 1}^t
     \varphi_{\text{legal}}^{i,j}
 \]
+Where the test $\varphi_{\text{legal}}^{i,j}$ returns true \textbf{if and only if} The placement of the 6 relevant
+variables if a placement that is allowed within the placements of $\left(\Gamma \cup Q\right)^6$. \\
+We want to translate everything into booleans, which is to say: \begin{itemize}
+    \item Every variable in the table $x_{i, j}$ will be switched into a set of boolean variables
+    \item Every check we want to formulate into : \begin{enumerate}
+        \item A formula using boolean variables
+        \item In the style of CNF
+    \end{enumerate}
+\end{itemize}
+For every original variable $x_{i, j}$, we need $\left\lceil \log_2 \left(\left|\Gamma\right| + \left|Q\right|\right)
+\right\rceil $ boolean variables. We will use the circumflex symbol to represent the boolean version of the formulas
+from the previous step: \[
+    \varphi_{\text{init}}  \left(x_{0, 0}, \dots, x_{0, t}\right)
+\]
+has only one requirement for each variable, therefore, $\hat{\varphi}_{\text{init}} $ also requires the same thing. \\
+Similarly, we can also describe $\hat{\varphi}_{\text{acc}} $ as a CNF formula. We therefore only need to handle
+$\varphi_{\text{legal}} $. \\
+For every placement of 6 original variables, there is a suitable placement for the boolean variables that encode them.
+For every such row we want the formula to return true if the value for the 6 is correct, and false otherwise. This is to
+say, we have acquired a truth table of the formula $\hat{\varphi}_{\text{legal}}^{i,j}$, and we want to find a CNF
+representation that agrees with this truth table. If we did not need it to be CNF structure, we could solve this as with
+truth tables in the past, DNF, which is to say, for every row that is true, we create a literal where every variable is
+connected by $\land$, and we connect the literals together with $\lor$. \\
+In order to create a CNF formula, we can create the DNF formula for every row that is \textbf{false}, and take the
+inverse of the resulting formula (DeMorgan), which will give us a CNF formula for $\hat{\varphi}_{\text{legal}}^{i,j}$. \\
+So:
+\[
+    \hat{\varphi} = \hat{\varphi}_{\text{init}} \land \hat{\varphi}_{\text{acc}} \land \land_{i,j = 0}^t
+    \hat{\varphi}_{\text{legal}}^{i,j}
+\]
+With that we have finished to show that there exists a formula $\hat{\varphi}$ which is a CNF formula, and that it is
+satisfiable \textbf{if and only if} $w \in L$. Good job Cook and Levin for creating this, and good job to us for
+understanding it. We now need to show that there exists a reduction $L \leq_p SAT$, which is to say that there exists a
+TM $M$, that is both deterministic, and polynomial, that for a given input $w$, will return $\hat{\varphi}$, such that
+\[
+    w \in L \Leftrightarrow \hat{\varphi} \in SAT
+\]
+which is to say, to show how we create $\hat{\varphi}$ from $w$ by a TM $M$ which deterministic, and polynomial.
+\begin{enumerate}
+    \item $M'$ will compute $t$ (some polynomial on $n = \left|w\right|$). This is easy in polynomial time
+    \item $M'$ will create $\hat{\varphi} \land \hat{\varphi}$, both are easy in polynomial time
+    \item $M'$ will run a double loop (on $i, j$ from 0 to $t$), and for each $i, j$ will print a copy of
+        $\hat{\varphi}_{\text{legal} }^{i,j}$. We will note that all the formulas of
+        $\hat{\varphi}_{\text{legal}}^{i,j}$ are exactly the same, beyond a change in the names of the variables. This
+        is to say that the formula $\hat{\varphi}_{\text{legal}} $ can be part of the encoding of the machine $M'$, and
+        $M'$ only needs to print this encoding again and again with the update $i, j$, and between every 2 copies, the
+        symbol $\land$.
+\end{enumerate}
+Note, the polynomial that will be used to calculate $t$ from $n = \left|w\right|$ exists, and therefore can be encoded
+within $M'$.
 % subsection Building and checking correctness for filling the table (end)
 
 
