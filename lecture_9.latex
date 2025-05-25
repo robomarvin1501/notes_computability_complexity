@@ -279,9 +279,81 @@ Note, the polynomial that will be used to calculate $t$ from $n = \left|w\right|
 within $M'$.
 % subsection Building and checking correctness for filling the table (end)
 
+\subsection{Runtime}\label{sub:Runtime} % (fold)
+$M'$ needs to print $\hat{\varphi}_{\text{init}}, \hat{\varphi}_{\text{acc}} $, both in polynomial time. Additionally,
+$M'$ needs to print for each value $0 \leq i, j < t$ $\hat{\varphi}_{\text{legal}}^{i,j}$. This is $t^2$ times, which is
+a polynomial number of times. Overall, we thus have a polynomial runtime
+% subsection Runtime (end)
 
-
+\subsection{Correctness}\label{sub:Correctness} % (fold)
+If $w \in L$, then there exists an accepting run fo $M \left(w\right)$, therefore there exists a correct way to fill the
+original table where in the first row $c_0$ is the starting configuration, in the final row is the accepting
+configuration, and every two subsequent rows are matched to subsequent configurations in the run. Therefore, every check
+will pass. Therefore, there exists a placement o boolean variables such that every CNF check passes, which is to say
+that is a satisfying placement for $\varphi$. \\
+If $w \notin L$, then every way to fill the original table is either suitable to a legal run that finishes in a
+configuration that rejects, or is not suitable to a legal run. In every case, at least one check of
+$\varphi_{\text{init}}, \varphi_{\text{acc}} $ or $\varphi_{\text{legal}}^{i,j}$ fails. Therefore, at least one CNF
+formula of these checks of boolean variables returns false, and therefore every placement does not satisfy
+$\hat{\varphi}$. This is to say $\hat{\varphi} \notin SAT$.
+% subsection Correctness (end)
 % section Cook Levin (end)
+
+\section{Different definitions of NP}\label{sec:Different definitions of NP} % (fold)
+We saw 2 definitions for NP: \begin{enumerate}
+    \item NP: All the languages $L$ which are recognised by a non deterministic, polynomial TM $M$
+    \item NP': All the languages $L$ such that there is a polynomial, deterministic verifier $M'$
+\end{enumerate}
+\subsection{Reminder}\label{sub:Reminder} % (fold)
+A verifier $M'$ for a language $L$ is a machine that accepts $w, c$ and enables the following: If $w \in L$, then there
+exists $c$ such that $M \left(w, c\right) = q_{\text{acc}} $, and if $w \notin L$, then for all $c$, $M \left(w,
+c\right) = q_{\text{rej}} $. Additionally, for every $c$, $M \left(w, c\right)$ runs in polynomial time by the length of
+$\left|w\right|$.
+% subsection Reminder (end)
+
+\subsection{Theorem}\label{sub:Theorem} % (fold)
+We want to prove that $NP = NP'$. This is useful because it is easier to show that something is in NP by creating a
+verifier, than to create an NTM, and if we prove once that they are equivalent, then we can use that forevermore. \\
+
+$NP' \subseteq NP$: We are given a language $L$, which has a deterministic polynomial verifier, which is to say a
+machine $M'$ suitable to the above definition. We want, using $M'$, to build a machine nil
+M, which is polynomial, and none deterministic, that recognises $L$. W.l.o.g. The length $\left|c\right|$ is bound by
+a polynomial of $\left|w\right|$. Explanation: $M'$ runs in polynomial time of $\left|w\right|$, and therefore cannot
+read more than a polynomial number of letters from $c$. \\
+$M$ will run as follows: Create a string $c'$, of length polynomial in $\left|w\right|$, in a non deterministic manner.
+Then run like $M'$ on $w, c$. \\
+\textbf{Correctness}: If $w \in L$, then there is $c$ such that $M' \left(w, c\right) = q_{\text{acc}} $, therefore
+there is an assumption of $M$ for the letter values of $c$ that will cause $M$ to return $q_{\text{acc}} $. IF $w \notin
+L$, then for every $c$, $M' \left(w, c\right) = q_{\text{rej}} $, and therefore for all $c$ that $M$ will create, the
+run will end in $q_{\text{rej}} $. \\
+\textbf{Runtime}: Create $c$ is bound by the length of $c$, which is to say wlog is bound from above by a polynomial in
+$\left|w\right|$. Additionally, the step of running $M' \left(w, c\right)$ is known to take time that is polynomial in
+$\left|w\right|$. In total, we have a polynomial runtime in $\left|w\right|$. \\
+
+$NP \subseteq NP'$: Given a language $L$, which has an MT $M$, that is polynomial, and non deterministic. We want to use
+it to build a TM $M'$ which is a polynomial verifier for $L$. We need to create a function \[
+    \delta : Q \times \Gamma \to P \left[Q \times \Gamma \times \left\{L, R\right\}\right]
+\]
+The number of options $k$ for choosing non deterministically in every step of the run is at most $\left|Q\right| \cdot
+\left|\Gamma\right| \cdot 2$. \\
+We will look at the run of $M \left(w\right)$. In every step of the run there is a non deterministic choice made by the
+function $\delta$. This defines a string in which every letter is a number between 1 and $k$. The length of the string
+is the number of steps of the run, which is to say, polynomial in $\left|w\right|$. We can define a TM $M'$, which is
+deterministic, which accepts the input $w$, and a string such as this, called $c$, which will simulate $M
+\left(w\right)$, where taking a non deterministic step, is a step chosen according to a letter in $c$. That is to say
+$M'$ runs like $M$, at every step similar to $M$, reads an additional letter from $c$, and uses that letter to choose
+which step of $\delta$ to run. We will note that $M'$ is deterministic. \\
+\textbf{Correctness}: If $w \in L$, then there exists an accepting run of $M \left(w\right)$, which is to say that there
+exists a series of non deterministic choices of $\delta$ that cause $M$ to arrive at $q_{\text{acc}} $, and therefore if
+$c$ is the string that describes this order of choices, then $M' \left(w, c\right)$ will return $q_{\text{acc}} $. \\
+If $w \notin L$, then every run of $M \left(w\right) = q_{\text{rej}} $, therefore for every string $c$, it holds that
+$M' \left(w, c\right) = q_{\text{rej}} $. \\
+\textbf{Runtime}: The length of $c$ is polynomial in $\left|w\right|$. The number of steps of the simulation that $M'$
+does is the number of steps of $M \left(w\right)$, which is to say polynomial in the length of $w$. Simulation of each
+step requires at most the length of the tape, which is to say at most, polynomial in $\left|w\right|$. In total, runtime
+is polynomial in $\left|w\right|$.
+% subsection Theorem (end)
+% section Different definitions of NP (end)
 
 
 \end{document}
