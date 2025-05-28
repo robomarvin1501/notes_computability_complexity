@@ -1,0 +1,243 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 9}
+\author{Gidon Rosalki}
+\date{2025-05-28}
+
+
+\begin{document}
+\maketitle
+\section{Verifiers}\label{sec:Verifiers} % (fold)
+Reminder: We define the language $NP$ as follows: \[
+    NP = \displaystyle\bigcup_{k = 0}^{\infty}NTIME \left(n^k\right)
+\]
+
+\begin{definition}[Polynomial verifier]
+    A verifier for a language $L$ is a deterministic TM $V$ which given $\left(w, c\right)$,
+    with $c$ polynomial in $\left|w\right|$, runs in polynomial time in $\left|w\right|$ and \begin{gather*}
+        \forall w \in L,\ \exists c \in \Sigma^* : V \left(w, c\right)= q_{\text{acc}}  \\
+        \forall w \notin L,\ \forall c \in \Sigma^*\ V \left(w, c\right) = q_{\text{rej}}
+    \end{gather*}
+    This $c$ is called a witness.
+\end{definition}
+
+\begin{theorem}[Equivalent definition of NP]
+     A language $L$ can be recognized by an NTM in polynomial time \textbf{if and only if}  there is a polynomial
+     verifier for L.
+
+     \begin{proof}[Proof ]
+         Proved in lecture 9
+     \end{proof}
+\end{theorem}
+
+\begin{example}[]
+    Let \[
+        \text{U-ST-HAMPATH} = \left\{\left\langle G, s, t \right\rangle : G \text{ is an undirected graph, and there
+        exists a Hamiltonian path from $s$ to $t$} \right\}
+    \]
+    Show that U-ST-HAMPATH is NP-Complete:
+    \begin{proof}[Solution]
+        We first need to show that U-ST-HAMPATH is in NP:
+        We will show that there exists a polynomial time verifier, $V$. Let $V$ take as input $w = \left\langle G, s, t
+        \right\rangle$, and a witness $c = \left\langle v_1, \dots, v_n \right\rangle$, a sequence of $n =
+        \left|V\right|$ vertices. $V$ then performs the following: \begin{enumerate}
+            \item Check if the first vertex is $s$, and the last is $t$
+            \item Check that all nodes are different (since if this is not the case, then there is a repetition, and
+                this is not a Hamiltonian path)
+            \item Validate the existence of an edge between every two adjacent vertices
+        \end{enumerate}
+        $\left\langle G, s, t \right\rangle \in U-ST-HAMPATH$ \textbf{if and only if} There is a Hamiltonian path in
+        $G$, from $s$ to $t$ \textbf{if and only if} There exists $c \in \Sigma^*$ such that $V$ accepts $\left(w,
+        c\right)$. \\
+        The witness $c$ is polynomial in the size of the input $\left|\left\langle G, s, t \right\rangle\right|$, and
+        each operation can be performed in polynomial time. \\
+
+        We now need to show that U-ST-HAMPATH is NP-Hard. In the previous tutorial, it was shown that $3-SAT \leq_p
+        D-ST-HAMPATH$. As 3-SAT is NP-Hard, then so is D-ST-HAMPATH. We can thus show that U-ST-HAMPATH is NP-Hard, by
+        performing the reduction  $D-ST-HAMPATH \leq_p U-ST-HAMPATH$. Let there be the reduction $f \left(\left\langle
+        G, s, t \right\rangle\right) = \left\langle G', s_{in}, t_{out} \right\rangle$, where $G'$ is defined as
+        follows: \begin{itemize}
+            \item For every vertex $v \in V$, our function will write the new vertices $v_{in}, v_{mid}, v_{out}$, and
+                connect the nodes with the following edges: $\left\{v_{in}, v_{mid}\right\}, \left\{v_{mid},
+                v_{out}\right\}$.
+            \item For every edge $\left(u, v\right) = e \in E$, we will define the new edge $u_{out}, v_{in}$.
+        \end{itemize}
+        Correctness: Let us assume that $\left\langle G, s, t \right\rangle \in D-ST-HAMPATH$. Then, let there be the
+        directed Hamiltonian path $s, u^1, u^2, \dots, u^k, t$ in $G$. Therefore, there is the path in $G'$:
+        \[
+            s_{in}, s_{mid}, s_{out}, u_{in}^1, u_{mid}^1, u_{out}^1, \dots u_{in}^k, u_{mid}^k, u_{out}^k, t_{in}, t_{mid}, t_{out}
+        \]
+        Since the original path contained all the vertices, then so too does the new path in $G'$, thus \[
+            \left\langle G', s, t \right\rangle \in U-ST-HAMPATH
+        \]
+        Let there be a Hamiltonian path in $G'$ from $s_{in}$ to $t_{out}$. Thus, there is a Hamiltonian path in $G'$,
+        but we do not know what this path "looks like". We proceed with the following claim. A Hamiltonian path that
+        starts at $s_{in}$ and ends at $t_{out}$ does not contain a directed traversal of the form $\left(v_{in},
+        u_{out}\right)$. That is to say, we never travel "backwards" along an edge. \\
+        Let us assume that there is such a directed traversal, and let $\left(v_{in}, u_{out}\right)$ be the first such
+        one in this path. Since the path is Hamiltonian, we must visit $v_{mid}$ at some point on the path. If we have
+        already visited it, then we must have visited it from $v_{out}$, since we are now located at $v_{in}$, and it
+        has no other edges, but in that case, in order to reach $v_{out}$, we must have arrived from some $x_{in}$,
+        which is a contradiction to $\left(v_{in}, u_{out}\right)$ being the first such pair. Therefore, we must visit
+        $v_{mid}$ after visiting $u_{out}$, and therefore we must reach it from $v_{out}$, at which point we get stuck,
+        since we have already visited $v_{in}$. Therefore, we cannot reach $t_{out}$. We can therefore conclude that all
+        the edges in the path are of the formats $\left(v_{in}, v_{mid}\right), \left(v_{mid}, v_{out}\right),
+        \left(v_{out}, u_{in}\right)$. Thus, the Hamiltonian path is of the form \[
+            s_{in}, s_{mid}, s_{out}, u_{in}^1, u_{mid}^1, u_{out}^1, \dots u_{in}^k, u_{mid}^k, u_{out}^k, t_{in}, t_{mid}, t_{out}
+        \]
+        which can be easily mapped to a Hamiltonian path in $G$.
+
+        Runtime: Clearly polynomial, since $\left|G'\right| = 3 \left|G\right|$, and computing it is trivial.
+    \end{proof}
+\end{example}
+% section Verifiers (end)
+
+\section{3-COLOURING}\label{sec:3-COLOURING} % (fold)
+Given a graph $G = \left(V, E\right)$, the $k$-COLOURING problem is to validate whether or not it is possible to colour
+all vertices in $k$ different colours such that no 2 neighbouring vertices have the same colour. \[
+    \text{3-COLOURING}  = \left\{\left\langle G \right\rangle : \text{ There's a valid 3-colouring of } G\right\}
+\]
+One way to check if a graph $\left\langle G \right\rangle$ is not in 3-COLOURING is by validating the existence of a
+clique of size 4 in $G$. This can be done in polynomial tie, since there are $\binom{\left|V\right|}{4}  = O
+\left(\left|V\right|^4\right)$ sets of size 4, and it takes polynomial time to verify if each is a clique.
+
+\begin{theorem}[3-COLOURING is NP-Complete]
+    We will first show that $3C \in NP$ by using a verifier $V$. Given a graph $\left\langle G \right\rangle$, and a
+    colouring $c$, $V$ checks if $c$ is a valid colouring of $G$, by going over all the edges in $E$, and verifying that
+    the vertices at each edge have different colours. This can be done in polynomial time. \\
+    We will now prove that $3-SAT \leq_p 3C$, thus proving hardness in NP. Let $\left\langle \varphi \right\rangle$ be a
+    3-CNF formula, with $x_1, \dots, x_n$ variables, and $c_1, \dots, c_m$ clauses. The reduction creates the following
+    graph: \begin{enumerate}
+        \item Create 3 vertices, $T, F, B$, and connect them all together.
+        \item For each variable $x_i \in \varphi$, create 2 vertices, $vx_i, \overline{vx_i}$, add an edge between them,
+            and an edge from each of them to $B$.
+                    \begin{center}
+                        \begin{tikzpicture}[node distance=3cm]
+                            \node[state] (T) {$T$};
+                            \node[state, below of=T] (F) {$F$};
+                            \node[state, right of=T] (B) {$B$};
+                            \node[state, right of=B] (xi) {$vx_i$};
+                            \node[state, below of=xi] (nxi) {$\overline{vx_i}$};
+
+                            \draw   (T) edge[] node{} (B)
+                                    (F) edge[] node{} (B)
+                                    (T) edge[] node{} (F)
+                                    (xi) edge[] node{} (B)
+                                    (nxi) edge[] node{} (B)
+                                    (nxi) edge[] node{} (xi)
+                                ;
+
+                        \end{tikzpicture} \\
+                    \end{center}
+        \item For each clause $c_j = \left(l_1 \lor l_2 \lor l_3\right)$, add triple or gadget graph, connect to relevant
+            literals vertices, and connect the output to $B$ and to $F$ (forcing it to be $T$)
+                    \begin{figure}[H]
+                        \center
+                        \includegraphics[scale=0.3]{tutorial_9_3colour}
+                        \caption{}
+                    \end{figure}
+                    % \begin{center}
+                    %     \begin{tikzpicture}[every node/.style={font=\small}]
+                    %       % Literal nodes
+                    %       \node[circle, draw, minimum size=8mm] (l1) {$l_1$};
+                    %       \node[circle, draw, below=of l1, minimum size=8mm] (l2) {$l_2$};
+                    %       \node[circle, draw, below=of l2, minimum size=8mm] (l3) {$l_3$};
+
+                    %       % Clause nodes (gray)
+                    %       \node[circle, draw, fill=gray!70, right=1.5cm of l1] (c1u) {};
+                    %       \node[circle, draw, fill=gray!70, right=1.5cm of l2] (c1d) {};
+                    %       \node[circle, draw, fill=gray!70, below right=1.0cm of c1u] (c1m) {};
+                    %       \node[circle, draw, fill=gray!70, below=1.2cm of c1m] (c2m) {};
+
+                    %       \node[circle, draw, fill=gray!70, right=1.5cm of c1m] (c12) {};
+                    %       \node[circle, draw, fill=gray!70, below=of c12] (c23) {};
+
+                    %       \node[circle, draw, fill=gray!70, below=of c2m] (cl3) {};
+
+                    %       % Terminal nodes
+                    %       \node[circle, draw, fill=green!30, right=1.5cm of c12] (T) {\textbf{T}};
+                    %       \node[circle, draw, fill=red!30, below=of T] (F) {\textbf{F}};
+                    %       \node[circle, draw, fill=blue!30, left=of F] (B) {\textbf{B}};
+
+                    %       % Edges from literals
+                    %       \draw (l1) -- (c1u);
+                    %       \draw (l2) -- (c1d);
+                    %       \draw (l3) -- (cl3);
+
+                    %       % Clause connections
+                    %       \draw (c1u) -- (c1d);
+                    %       \draw (c1u) -- (c1m);
+                    %       \draw (c1d) -- (c1m);
+                    %       \draw (c1m) -- (c12);
+                    %       \draw (cl3) -- (c2m);
+                    %       \draw (c2m) -- (c12);
+                    %       \draw (c2m) -- (c23);
+                    %       \draw (cl3) -- (c23);
+
+                    %       % Final connections
+                    %       \draw (c12) -- (B);
+                    %       \draw (c12) -- (T);
+                    %       \draw (c23) -- (F);
+                    %       \draw (c23) -- (B);
+
+                    %       % Clause labels
+                    %       % \node at ($(c1m)!0.5!(c1u)+(0,0.4)$) {$l_1 \vee l_2$};
+                    %       % \node at ($(c12)!0.5!(c2m)+(0,0.4)$) {$l_1 \vee l_2 \vee l_3$};
+
+                    %     \end{tikzpicture}
+                    % \end{center}
+                    Notice, if $l_1, l_2, l_3$ are all false, then the triple or gadget output must be coloured false,
+                    but it is also connected to F , so it is an invalid colouring. On the other hand, if at least one of
+                    them is coloured true then there exists a valid colouring.
+    \end{enumerate}
+    Correctness: $\varphi \in 3SAT \implies \varphi$ is satisfiable. Let $A \left(x_i\right) \to \left\{T, F\right\}$ be
+    a satisfying assignment. If $x_i$ is assigned $T$, we colour $vx_i$ green $= T$, and $\overline{vx_i}$ red $= F$.
+    Otherwise, we assign the opposite. This is valid as they are connected to $B$, and to each other, 3 different
+    colours so far. Since $\varphi$ is satisfiable, each clause $c_j$ is satisfiable, so at least one of the literals is
+    true, and from the gadget observation, it is 3-colourable. \\
+    Let $\left\langle G \right\rangle \in 3C$. We construct a satisfying assignment through the colour of the vertices
+    $vx_i$. If it is coloured true we assign true, otherwise false. If by contradiction this is not a satisfying
+    assignment, then there is a clause $c_j$ which is not satisfied. As such, $l_1^j, l_2^j, l_3^j$ are all false, and
+    are thus all coloured false in the graph. In this case this means the clause triple or gadget is not 3 colourable,
+    thus the entire graph is not 3 colourable in contradiction. So the assignment must be a satisfying assignment. \\
+    Runtime: For each variable we construct 2 nodes, and connect 3 edges, this is polynomial in $n$. For each clause we
+    create an or gadget which is a fixed size of nodes and edges. There are $m$ gadgets, so this too is polynomial in
+    the input size.
+\end{theorem}
+% section 3-COLOURING (end)
+
+\end{document}
