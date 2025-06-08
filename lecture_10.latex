@@ -1,0 +1,236 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 10}
+\author{Gidon Rosalki}
+\date{2025-06-08}
+
+
+\begin{document}
+\maketitle
+\section{The hierarchy theorems}\label{sec:The hierarchy theorems} % (fold)
+\begin{theorem}[Hierarchy theorem of time]
+    For every function $f$ that is calculable in $O \left(f\right)$, it holds that: \[
+        \text{Time} \left(o \left(f \left(n\right)\right)\right) \subsetneq \text{Time}  \left(f \left(n\right) \log \left(n\right)\right)
+    \]
+    (Yes, that is meant to be a little $o$)
+\end{theorem}
+
+\begin{theorem}[Hierarchy theorem of space]
+    For every function $f$ that is calculable in space $O \left(f\right)$ it holds that \[
+        \text{Space}  \left(o \left(f \left(n\right)\right)\right) \subsetneq \text{Space}  \left(f \left(n\right)\right)
+    \]
+    (Yes, that is meant to be a little $o$)
+\end{theorem}
+
+\subsection{Hierarchy theorem in time}\label{sub:Hierarchy theorem in time} % (fold)
+We will return to the proof that shows that $R \subsetneq RE$ , and if we update it with limitation on time / space,
+then we get the Hierarchy theorems above. Reminder: \[
+    A_{TM} = \left\{\left\langle M \right\rangle, w : M \left(w\right) = q_{\text{acc}} \right\}
+\]
+We will assume by contradiction that there exists a DTM $H$ that decides $A_{TM}$. This is to say \[
+    H \left(\left\langle M \right\rangle, w\right) = q_{\text{acc} } \Leftrightarrow M \left(w\right) = q_{\text{acc}}
+\]
+We will define $D \left(\left\langle M \right\rangle\right) = H \left(\left\langle M \right\rangle, \left\langle M
+\right\rangle\right)$, and $\overline{D} \left(\left\langle M \right\rangle\right) = \overline{D \left(\left\langle M
+\right\rangle\right)}$ (which is to say, swapping between $q_{\text{acc}}, q_{\text{rej}} $. If \begin{align*}
+    \overline{D} \left(\left\langle \overline{D} \right\rangle\right) = q_{\text{acc}} &\implies D \left(\left\langle \overline{D}
+    \right\rangle\right) = q_{\text{rej}} \\
+                                                                             &\implies H \left(\left\langle \overline{D}
+                                                                             \right\rangle, \left\langle \overline{D}
+                                                                         \right\rangle\right) = q_{\text{rej}} \\
+                                                                             &\implies \overline{D} \left(\overline{D}\right) =
+                                                                             q_{\text{rej}}
+\end{align*}
+and if \begin{align*}
+    \overline{D} \left(\left\langle \overline{D} \right\rangle\right) = q_{\text{rej}}  &\implies D \left(\left\langle \overline{D}
+    \right\rangle\right) = q_{\text{acc}} \\
+                                                                             &\implies H \left(\left\langle \overline{D}
+                                                                             \right\rangle, \left\langle \overline{D}
+                                                                         \right\rangle\right) = q_{\text{acc}}  \\
+                                                                             &\implies \overline{D} \left( \overline{D}\right) =
+                                                                             q_{\text{acc}}
+\end{align*}
+so in both cases, we arrive at a contradiction.
+
+Let us define a language: \[
+    A_f = \left\{\left(\left\langle M \right\rangle, w\right) : M \left(w\right) = q_{\text{acc}}  \land \text{Running
+    $M$ on $w$ finishes in at most $f \left(\left|w\right|\right)$ steps} \right\}
+\]
+We may decide the language $A_f$ by using a UTM (in how much time?) We will show, with a similar proof to that of
+$A_{TM}$ that we may not decide $A)f$ in time $o \left(f \left(n\right)\right)$. \\
+Let us assume by contradiction that there is a TM $H_f$ that decides $A_f$ in $o \left(f \left(n\right)\right)$ steps.
+We will use $H_f$ to build $D$: \[
+    D \left(\left\langle M \right\rangle\right) = H_f \left(\left\langle M \right\rangle, \left\langle M \right\rangle\right)
+\]
+We will then use $D$ to build $\overline{D}$: \[
+    \overline{D} \left(\left\langle M \right\rangle\right) = \overline{D \left(\left\langle M \right\rangle\right)}
+\]
+Which is to say, a swapping of $q_{\text{acc}} $ and $q_{\text{rej}} $. So, what does $\overline{D} \left(\left\langle
+\overline{D} \right\rangle\right)$ reutrn? \\
+If $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) = q_{\text{acc}} $, then $D \left(\left\langle \overline{D}
+\right\rangle\right) = q_{\text{rej}} \implies H_f \left(\left\langle \overline{D} \right\rangle, \left\langle \overline{D}
+\right\rangle\right) = q_{\text{rej}} $, and so $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) =
+q_{\text{rej}} $, which is a contradiction. \\
+(Note: The runtime of $H_f$ is $o \left(f \left(n\right)\right)$, and therefore so is $D$, and $\overline{D}$) \\
+If $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) = q_{\text{rej}} $, then $D \left(\left\langle \overline{D}
+\right\rangle\right) = q_{\text{acc}} \implies H_f \left(\left\langle \overline{D} \right\rangle, \left\langle \overline{D}
+\right\rangle\right) = q_{\text{acc}} $, and so we get that $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) =
+q_{\text{acc}} $, which is once more a contradiction.
+
+We have shown here that there exists a language $A_f \notin \text{Time} \left(o \left(f \left(n\right)\right)\right)$.
+It is clear that $A_f$ is decidable, the question is in what runtime. We may decide $A_f$ as follows: Initialise a timer
+for $f \left(\left|w\right|\right)$, run the UTM $U$: $U \left(\left\langle M \right\rangle, w\right)$, and after
+simulating each step, we reduce the value of the timer by 1. If the timer reaches 0, we will stop and return
+$q_{\text{rej}} $, and if before the timer reaches 0, the simulation of $M$ reaches $q_{\text{acc}} $, or
+$q_{\text{rej}} $, then we will return accordingly. This machine is clearly a deciding machine of $A_f$, but how much
+time does it take? We need to consider initialising the timer, and reducing its value every step. There is an
+implementation of a UTM $U$, that simulates the run of $f \left(n\right)$ steps, in $O \left(f \left(n\right) \log
+\left(f \left(n\right)\right)\right)$ steps of $U$. We will require that the function $f$ is calculable in time
+$O\left(f \left(n\right)\right)$. This is to say, given $1^n$, we may compute $1^{f \left(n\right)}$ in $O \left(f br
+n\right)$. \\
+Conclusion: For every function $f$, that is computable in $O \left(f\right)$, it is true that \[
+    \text{Time} o \left(f \left(n\right)\right) \subsetneq \text{Time}  \left(f \left(n \log \left(f \left(n\right)\right)\right)\right)
+\]
+
+Example: $n^2$ is calculable in $O \left(n^2\right)$, and also $n^2 = o \left(n^{2.1}\right)$, and also $n^2 \cdot \log
+\left(n^2\right) = O \left(n^3\right)$, and so $\text{Time} \left(n^2\right) \subsetneq \text{Time} \left(n^3\right)$.
+
+From all this, we may conclude that $P \subsetneq Exp$, for example there is a language $L \in \text{Time}
+\left(2^n\right)$, and $L \notin \text{Time} \left(n^k\right)$ for any constant $k$.
+% subsection Hierarchy theorem in time (end)
+
+\subsection{Hierarchy theorem of space}\label{sub:Hierarchy theorem of space} % (fold)
+For every function $f$ that is computable in space $O \left(f\right)$ it is true that \[
+    \text{Space} \left(o \left(f \left(n\right)\right)\right) \subsetneq \text{Space}  \left(f \left(n\right)\right)
+\]
+The proof is almost identical to the proof for time, however we will simply replacement the time limitation at every
+point of the proof, with a limitation of space. The theorem is stronger for space (tighter spearation), since there
+exists a UTM $Y$ that simulates $M \left(w\right)$ in space $O \left(f \left(n\right)\right)$ where $f \left(n\right)$
+is the space limitation of the run of $M$. \\
+We can limit the space, similarly to the timer, where we begin by adding a symbol to every cell in the tape that we are
+allowed to use, and if the simulation tries to go beyond these cells, we reject.
+% subsection Hierarchy theorem of space (end)
+% section The hierarchy theorems (end)
+
+\section{Savitch theorem}\label{sec:Savitch theorem} % (fold)
+\[
+    NSpace \left(f \left(n\right)\right) \subseteq Space \left(f^2 \left(n\right)\right)
+\]
+For every function $f \left(n\right)$ that is computable in space $O \left(f \left(n\right)\right)$ \\
+From this we may conclude that \[
+    NPSPACE = PSPACE
+\]
+Reminder: \[
+    PSPACE = \displaystyle\bigcup_{k = 1}^{\infty} SPACE \left(n^k\right)
+\]
+\[
+    NPSPACE = \displaystyle\bigcup_{k = 1}^{\infty}NSPACE \left(n^k\right)
+\]
+
+Proof of conclusion: $PSPACE \subseteq NPSPACE$ - this is trivial, since every DTM is a special case of an NTM with the
+same space limitation. We will show the second direction: Let there be $L \in NPSPACE$, which is to say, there exists
+$k$, some constant, such that $L \in NPSPACE \left(n^k\right)$. By the Savitch theorem, \[
+    L \in SPACE \left(\left(n^k\right)^2\right) = SPACE \left(n^{2k}\right) \subseteq PSPACE
+\]
+
+\subsection{Savitch proof}\label{sub:Savitch proof} % (fold)
+For a TM $M$, and an input $w$, we will define the configuration graph $G_{M, w}$. The nodes of $G_{M, w}$ will be all
+the possible configurations. There exists an directed edge from $u$ to $v$ \textbf{if and only if} the configuration
+represented by $v$ is the configuration that follows the configuration that is represented by $u$. For a DTM, for every
+configuration, there is a single following configuration, and therefore for every node, there is a single edge that
+leaves. However, in an NTM, there are many configurations that follow a given configuration, and therefore for every
+node, there may be more than one edge that leaves it. \\
+We will define 2 nodes in the graph: The node $c_0$ which is the starting configuration: $c_0 = q_0 w$. Additionally, the node
+$c_{\text{acc}} $ which represents the accepting configuration $c_{\text{acc}} = q_{\text{acc}} $. \\
+Reminder: We have shown in the proof of Cook's theorem, that w.l.o.g. there is a single accepting configuration. Note
+that the change to $M$ in order so that there is a single accepting configuration does not increase the space
+complexity. \\
+We will note that $w \in L \Leftrightarrow$ there is an accepting run of $M \left(w\right) \Leftrightarrow$ in the graph
+$G_{M, w}$ there is a directed path from $c_0$ to $c_{\text{acc}} $. \\
+
+So, how many nodes are there in $G_{M, w}$, or rather, how many possible configurations are there? \[
+    \text{Num configurations} = \text{Number of states} \times \text{Head locations} \times \text{Tape contents} = \left|Q\right| \cdot O \left(f
+    \left(n\right)\right) \cdot \left|\Gamma\right|
+\]
+It is clear that we may decide $L$ through a DTM as follows: We will create $G_{M, w}$. Run on it BFS, or DFS, starting
+from $c_0$. We will return $q_{\text{acc}} $ \textbf{if and only if} we arrive at $c_{\text{acc}} $. \\
+Correctness is trivial. \\
+Space complexity is $\geq$ the number of nodes in $G_{M, w}$, which is exponential in $f \left(n\right)$. \\
+
+For a language $L \in NSPACE \left(f \left(n\right)\right)$, there exists an NTM $M$, which runs in space $O \left(f
+\left(n\right)\right)$. We want to show that there exists a DTM $M'$, that decides $L$, in $O \left(f^2
+\left(n\right)\right)$ space.
+
+The procedure $Reach \left(u, v, t\right)$ answers the question: Does there exist a path in $G_{M, w}$ that starts at
+$u$, and finishes at $v$, with length $\leq t$? We will show a DTM that computes $Reach.$
+
+% \usepackage{algorithm,algorithmicx,algpseudocode}
+\begin{algorithm}
+    \floatname{algorithm}{Reach}
+    \algrenewcommand\algorithmicrequire{\textbf{Input: }}
+    \algrenewcommand\algorithmicensure{\textbf{Output: }}
+    \caption{}\label{alg:}
+    \begin{algorithmic}[1]
+        \Require $u, v, t$
+        \Ensure $bool$
+        \If{$u = v$}
+            \State \textbf{return} $T$
+        \EndIf
+        \If{$v$ is a successor of $u$}
+            \State \textbf{return} $T$
+        \EndIf
+        \If{$t \leq 1$}
+            \State \textbf{return} $F$
+        \EndIf
+        \For{$m \in V \left(G_{M, w}\right)$}
+            \State $q_1 \gets Reach \left(u, m, \left\lceil \displaystyle\frac{t}{2} \right\rceil \right)$
+            \State $q_2 \gets Reach \left(u, m, \left\lfloor \displaystyle\frac{t}{2} \right\rfloor \right)$
+            \If{$q_1 \land q_2$}
+                \State \textbf{return} $T$
+            \EndIf
+        \EndFor
+        \State \textbf{return} $F$
+    \end{algorithmic}
+\end{algorithm}
+
+Note: We will initialise the run with $u = c_0$ and $v = c_{\text{acc}} $, and $t = \#conf$. The correctness is trivial,
+and we will analyse the runtime:
+
+% subsection Savitch proof (end)
+% section Savitch theorem (end)
+
+\end{document}
