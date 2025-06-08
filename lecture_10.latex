@@ -229,8 +229,70 @@ $u$, and finishes at $v$, with length $\leq t$? We will show a DTM that computes
 
 Note: We will initialise the run with $u = c_0$ and $v = c_{\text{acc}} $, and $t = \#conf$. The correctness is trivial,
 and we will analyse the runtime:
+For every recursive call we will create a new 3-tuple, but 2 calls of the same depth are used for the same space. We
+want to analyse the space complexity in $M'$. A check of if $u = v$ does not require any additional space. A check of if
+$v$ follows $u$ does not require any additional space. How much space is required for a single 3-tuple? \\
+\begin{align*}
+    u &= \log \left(\left|Q\right| \cdot O \left(f \left(n\right)\right) \cdot \left|\Gamma\right|^{O \left(f
+    \left(n\right)\right)}\right) \\
+      &= \log \left|Q\right| + O \left(\log \left(f \left(n\right)\right)\right) + O \left(f \left(n\right)\right) \cdot
+      \log \left|\Gamma\right| \\
+      &= O \left(f \left(n\right)\right)
+\end{align*}
+Similarly, $v$ requires $O \left(f \left(n\right)\right)$, and $t$ requires $O \left(f \left(n\right)\right)$. So, in
+total for the whole 3-tuple: $O \left(f \left(n\right)\right)$. The maximum number of 3-tuples is the maximum depth of
+the recursion, which is in total $O \left(\log \left(\# conf\right)\right)$, which is to say $O \left(f
+\left(n\right)\right)$, so in total, our space complexity is $O \left(f^2 \left(n\right)\right)$.
 
+So the space complexity is sublinear: Examples $L = Space \left(\log \left(n\right)\right)$, and $NL = NSpace \left(\log
+\left(n\right)\right)$
 % subsection Savitch proof (end)
+
+We will create a TM that is suitable for discussing sublinear space. We will use a machine with 3 tapes: Input, work,
+and output, where input and work are read only, and output is write only. The head of the output tape can, at every run
+step, either print a letter, or not. If it prints, it moves one step to the right, and does not return. Let us define
+$\delta$: \[
+    \delta: Q \times \Sigma \times \Gamma \to Q \times \Gamma \times \left\{\Sigma \cup \emptyset\right\}
+\]
+The run space is measured purely from the work tape, and so the output tape cannot return to the left, since this would
+increase the work space.
+
+Consider the example: Language $A \in Space \left(\log \left(n\right)\right)L$ \textbf{if and only if} There exists a DTM
+$M$ that decides $A$, and in the space $O \left(\log \left(n\right)\right)$. This is to say that $M$ is a machine of 2
+tapes, input and work. The space limitation on the work tape is $O \left( \log \left(n\right)\right)$. \\
+Similarly, $B \in NL$ if there exists an NTM that decides $B$, and in space that is logarithmic, which is to say, 2
+tapes, input, and work, with a size limitation on the work tape of $O \left(\log \left(n\right)\right)$.
+
+\begin{theorem}[$L \subseteq P$]
+    This is to say that $A \in L \implies A \in P$, or if there is a DTM that is run in logarithmic space, then there is
+    a DTM that runs in polynomial time.
+    \begin{proof}[Proof ]
+        Let there be $M$ a DTM that decides $A$ in a logarithmic amount of space. How many configurations does this
+        machine have? Number of states, times the location of the input head, times the location of the work head, times
+        the contents of the work tape: \begin{align*}
+            \left|Q\right| \cdot n \cdot O \left(\log \left(n\right)\right) \cdot \left|\Gamma\right|^{O \left(\log
+            \left(n\right)\right)} &= \left|Q\right| \cdot n \cdot O \left(\log \left(n\right)\right) \cdot 2^{\log_2
+        \left(\left|\Gamma\right|\right) \cdot O \left(\log_2 \left(n\right)\right)} \\
+                                   &= O \left(n^c\right)
+        \end{align*}
+        Where $c$ is some constant. Overall, the number of configurations is $O \left(n^d\right)$, where $d$ is some
+        constant. It is clear that $M$ does not return to the same configuration in a run, since it if did, it would be
+        in an infinite loop. \\
+        Conclusion, the runtime of $M$ on $w \leq$ the number of possible configurations, which is $O \left(n^d\right)$,
+        which is to say, a polynomial runtime, and so $A \in P$
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    If $M$ calculates the function $f$, and $M$ is a DTM, that runs in space $O \left(\log \left(n\right)\right)$, then
+    the length of the input $\left|f \left(w\right)\right|$ is bound from above by a polynomial.
+
+    \begin{proof}[Proof ]
+        The proof is similar to the previous theorem. The number of configurations is bound by a polynomial, and
+        therefore the number of steps, and the number of prints, are also bound by a polynomial.
+    \end{proof}
+\end{theorem}
+
 % section Savitch theorem (end)
 
 \end{document}
