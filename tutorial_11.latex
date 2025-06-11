@@ -1,0 +1,278 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 11}
+\author{Gidon Rosalki}
+\date{2025-06-11}
+
+
+\begin{document}
+\maketitle
+\section{Space complexity}\label{sec:Space complexity} % (fold)
+\begin{definition}[Space complexity for a TM run]
+    Let there be a TM $M$, and $w \in \Sigma^*$. We denote $r$ and $l$ to be the rightmost and leftmost cells that get
+    used in the run of $M$ on $w$, respectively. We will say that $M$ runs on $w$ in space \[
+        r - l + 1
+    \]
+\end{definition}
+
+\begin{definition}[Space complexity for an NTM run]
+    Let there be an NTM $N$, and $w \in \Sigma^*$, such that all branches of $N$ on $w$ halt. We denote $r_a$ and $l_a$
+    to be the rightmost and leftmost cells that get used in the run of $N$ on $w$, respectively. We will say that $N$
+    runs on $w$ in space \[
+        \displaystyle\max_{a \text{ is a run of $N$ on $w$} } \left\{r_a - l_a + 1\right\}
+    \]
+\end{definition}
+
+\begin{definition}[Space complexity]
+    Let $T$ be a TM or NTM wherein all branches halt on all inputs, the space complexity of $T$ is the function \[
+        g: \N \to \N
+    \]
+    where for every $n \in \N$, $g \left(n\right)$ is the maximum space that $T$ uses on any word of length $n$. For a
+    function $f: \N \to \N$, we say that $T$ runs in space \[
+        O \left(f \left(n\right)\right) \text{ if } g \left(n\right) = O \left(f \left(n\right)\right)
+    \]
+\end{definition}
+
+\begin{definition}[Space classes]
+    For every $f: \N \to \N$ \[
+        SPACE \left(f \left(n\right)\right) = \left\{L \subseteq \Sigma^* : L \text{ can be decided by a TM that runs in
+        } O \left(f \left(n\right)\right) \text{ space} \right\}
+    \]
+    and \[
+        NSPACE \left(f \left(n\right)\right) = \left\{L \subseteq \Sigma^* : L \text{ can be recognised by an NTM that runs in
+        } O \left(f \left(n\right)\right) \text{ space} \right\}
+    \]
+
+\end{definition}
+
+\begin{definition}[PSPACE and NPSPACE]
+    Similarly to $P$ and $NP$, we define \begin{gather*}
+        PSPACE = \displaystyle\bigcup_{k = 1}^{\infty} SPACE \left(n^k\right) \\
+        NPSPACE = \displaystyle\bigcup_{k = 1}^{\infty} NSPACE \left(n^k\right)
+    \end{gather*}
+\end{definition}
+% section Space complexity (end)
+
+\section{TQBF}\label{sec:TQBF} % (fold)
+A \textbf{quantified} boolean formula is a boolean formula that is preceded by $\exists$ and $\forall$ quantifiers on the
+variables. A \textbf{fully} quantified formula is one such that every variable is under the scope of a quantifier. A
+fully quantified formula is always either true or false.
+
+\begin{example}[]
+    \[
+        \forall x\ \exists y\ \left(\left(x \lor y\right) \land \left(\overline{x} \lor \overline{y}\right)\right)
+    \]
+    \begin{proof}[Solution]
+        This formula is true, since for $x = F$ we can take $y = T$, and for $x = T$ we can take $y = F$.
+    \end{proof}
+\end{example}
+
+\begin{example}[]
+    \[
+     \exists y\ \forall x\ \left(\left(x \lor y\right) \land \left(\overline{x} \lor \overline{y}\right)\right)
+    \]
+    \begin{proof}[Solution]
+        This is false, since for both $y = F$ and for $y = T$, we can find a value for $x$, (namely $x = y$), such that
+        one of the conjuncts does not hold.
+    \end{proof}
+\end{example}
+
+\begin{definition}[TQBF]
+    \[
+        TQBF = \left\{\left\langle \varphi \right\rangle : \varphi \text{ is a true fully quantified boolean formula} \right\}
+    \]
+\end{definition}
+If such a formula only contains $\exists$ quantifiers for all the variables, then this is a satisfiability problem, so
+this language is sometimes called QSAT (quantified SAT)
+
+\begin{theorem}[TQBF is in PSPACE]
+    \[
+        TQBF \in PSPACE
+    \]
+
+    \begin{proof}[Proof ]
+        We will show this by constructing a TM that runs a recursive algorithm. \\
+        \textbf{Construction}: On input $\left\langle \varphi \right\rangle$, a fully quantified boolean formula: \begin{enumerate}
+            \item If $\varphi$ contains no quantifiers, meaning it is only made of boolean constants, then we will
+                evaluate it, and accept if it evaluated to true, and reject if it evaluated to false.
+            \item If $\varphi = \exists x \varphi'$, then evaluate $\varphi'$, first with $x = F$, and then with $x =
+                T$. If \textbf{either} returns true, then accept, and if both are false, then reject.
+            \item If $\varphi = \forall x \varphi'$, then evaluate $\varphi'$, first with $x = F$, and then with $x =
+                T$. If \textbf{both} return true, then accept, and if either are false, then reject.
+        \end{enumerate}
+        \textbf{Correctness}: It can be shown by induction that $M$ decides TQBF. \\
+        \textbf{Space complexity}: Observe, the depth of recursion is at most the number of variables $m$. We make at
+        most 2 recursive calls per quantifier, and at each level of recursion, we need to store the formula with the
+        replaced variables, so the total space used is $O \left(n\right)$. At the bottom of the recursion, we need to
+        evaluate the formula, which takes another $O \left(n\right)$ space. Therefore, $T$ runs in $O \left(m \cdot
+        n\right)$, and since $m = O \left(n\right)$ , we get a total space $O \left(n^2\right)$.
+    \end{proof}
+\end{theorem}
+% section TQBF (end)
+
+\section{Encoding configurations using boolean formulas}\label{sec:Encoding configurations using boolean formulas} % (fold)
+To prove that TQBF is PSPACE-complete, we need to give some background on how to encode configurations of a
+Turing-machine using Boolean formulas. This section might be a bit cumbersome, but is wonderfully useful. \\
+Let $M$ be a TM, and let $s$ be a tape size. We encode a configuration that uses at most $s$ tape cells using the
+following assignment of boolean variables: \begin{itemize}
+    \item \textbf{Machine state}: For each $q \in Q$, we will define $z_q$ such that $z_q = T$ \textbf{if and only if}
+        the machine is in state $q$
+    \item \textbf{Head position}: For each $i \in \left[s\right]$, we will define $y_i$ such that $y_i = T$ \textbf{if
+        and only if} the head is over the $i$th cell
+    \item \textbf{Tape content}: For each $i \in \left[s\right]$, and $a \in \Gamma$, we have a variable $x_{i, a}$,
+        such that $x_{i, a} = T$ \textbf{if and only if} $a$ is written in the $i$th cell
+\end{itemize}
+We will denote a tuple of all these variables $c$, and claim the following theorem:
+
+\begin{theorem}[]
+    \begin{enumerate}
+        \item There exists a boolean formula $\varphi_{\text{valid}} \left(c\right)$, that evaluates to True \textbf{if
+            and only if} $c$ is a valid encoding of a configuration
+        \item There exists a boolean formula $\varphi \left(c_1, c_2\right)$ that evaluates to True \textbf{if and only
+            if} $c_2$ is a consecutive configuration to $c_1$.
+    \end{enumerate}
+    We can construct both formulas in polynomial time with respect to $s$
+    \begin{proof}[Proof ]
+        \begin{enumerate}
+            \item Let us define \[
+                    \varphi_{\text{valid}} \left(c\right) = \bigwedge_{i \in \left[s\right]}
+                    \bigvee_{a \in \Gamma} \left(x_{i, a} \land \bigwedge_{b \in \Gamma \setminus a}
+                    \overline{x_{i, b}}\right) \land \bigvee_{i \in \left[s\right]} \left(y_i \land \bigwedge_{j \in
+                \left[s\right] \setminus \left\{i\right\}} \overline{y_j}\right) \land \bigvee_{q \in Q} \left(z_q
+            \land \bigwedge_{r \in Q \setminus \left\{w\right\}} \overline{z_r}\right)
+                \]
+                Where the first brackets indicate that each tape cell holds exactly one letter, the second that the head
+                is at exactly one tape position, and the third that the machine is in exactly one state. Note that the
+                formula is of length $O \left(s^2\right)$, ($Q$ and $\Gamma$ are constants).
+            \item For every $q \in Q$, and $a \in \Gamma$, if $\delta \left(q, a\right) = \left(r, b, R\right)$, we
+                define for every $i \in \left[s\right]$ \[
+                    \varphi_{i, a, q} \left(c_1, c_2\right) = \left(x_{i, a}^1 \land y_{i}^1 \land z_q^1\right) \implies
+                    \left(x_{i, b}^2 \land y_{i + 1}^2 \land z_r^2 \land \bigvee_{j \in \left[s\right] \setminus
+                    \left\{i\right\}} \bigvee_{d \in \Gamma} \left(x_{j, d}^1 \Leftrightarrow x_{j, d}^2\right)\right)
+                \]
+                and if $\delta \left(q, a\right) = \left(r, b, L\right)$, then we do the exact same thing, but with $i -
+                1$. The formula (for the $R$ case) guarantees that if in $c_1$ the head is in position $i$ over the
+                letter $a$, and the machine is in state $q$, then in $c_2$ the head is in position $i + 1$ over the
+                letter $b$ and the machine is in state $r$. The first part checks the previous configuration and the
+                second part verifies that what should be changed is changed, and what should not be changed remains as
+                is. \\
+                There are several exceptions in the definition of $\varphi_{i, a, q}$: \begin{enumerate}
+                    \item If the head is in the leftmost cell, and the move is $L$, then the head does not move
+                    \item If the head is the rightmost cell, and the move is $R$, then there is no valid consecutive
+                        configuration
+                    \item If the configuration is accepting, then we require that the configuration stays the same.
+                \end{enumerate}
+
+                Finally, let us define: \[
+                    \varphi \left(c_1, c_2\right) = \varphi_{\text{valid}} \left(c_1\right) \land \varphi_{\text{valid}}
+                    \left(c_2\right) \land \bigvee_{i \in \left[s\right]} \bigvee_{a \in \Gamma} \bigvee_{q \in Q}
+                    \varphi_{i, a, q} \left(c_1, c_2\right)
+                \]
+                Note, the length of the formula is $O \left(s^2\right)$. A similar construction also works for NTMs.
+
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[PSPACE-hard]
+    A language $L$ is PSPACE-hard if for every $K \in PSPACE$ it holds that $K \leq_p L$
+\end{definition}
+
+\begin{theorem}[TQBF is PSPACE-hard]
+    \begin{proof}[Proof ]
+        We show that $\forall L \in PSPACE\ L \leq_p TQBF$. Let $L \in PSPACE$, and let $M$ be a machine that decides
+        $L$, suing at most $s \left(n\right)$, where $s$ is some polynomial. Assume w.l.o.g. that $M$ has a single
+        accepting configuration on each word $w$ (We do not lose generality since every machine in PSPACE has such an
+        equivalent machine also in PSPACE, that is obtained by changing every accepting state to a state that deletes
+        the contents of the tape before accepting). \\
+        Given a word $w$, our reduction outputs a formula $\eta$, such that $\eta$ has the value true \textbf{if and
+        only if} $M$ accepts $w$. We can do this by using the tools developed earlier. Let $n = \left|w\right|,\ s = s
+        \left(n\right),\ c_0$ be the start configuration, $c_{\text{acc}} $ be the accepting configuration, and $t$ be
+        the maximum length of a run of a TM in space $s$. \\
+
+        \textbf{Naïve attempt}: Let us define \[
+                \exists c_1, \dots, c_t\ \left(c_1 = c_0 \land \left(c_t = c_{\text{acc}} \right) \land \bigwedge_{i = 1}^{t
+                - 1} \varphi \left(c_i, c_{i + 1}\right)\right)
+            \]
+        The problem here is that the maximum run time $t$ is exponential in $s$, and thus in $n$, and thus this would
+        yield a formula that is of exponential length. \\
+        We can use recursion to shorten the formula, but keep its meaning. $M$ accepts a word $w$ \textbf{if and only
+        if} there is a path of length at most $t$ from $c_0$ to $c_{\text{acc}} $, where $t$ is the runtime of $M$, and
+        is exponential in $s \left(n\right)$. This happens \textbf{if and only if} there is a path from $c_0$ to some
+        $c_m$ of length $\frac{t}{2}$, and a path from $c_m$ to $c_{\text{acc}} $ of length $\frac{t}{2}$ (we can assume
+        w.l.o.g. that $t$ is a power of 2). \\
+        \textbf{Second attempt}: Behold, another wrong attempt, but is more in the correct direction: Let us construct,
+        inductively, a formula $\varphi_t \left(c_0, c_{\text{acc}} \right)$ which states that $c_{\text{acc}} $ is
+        reachable from $c_0$ within at most $t$ steps. More generally, we construct the formula $\varphi_k \left(c_0,
+        c_{\text{acc}} \right)$ which states that $c_2$ is reachable from $c_1$ within at most $k$ steps. The formula is
+        constructed as follows. First, if $k = 1$, then $\varphi_1 \left(c_1, c_2\right)$ is simply the formula $\varphi
+        \left(c_1, c_2\right)$ that we constructed earlier, stating that $c_2$ is consecutive to $c_1$. Then, we define:
+        \[
+            \varphi_k \left(c_1, c_2\right) = \exists c_m \left(\varphi_{\frac{k}{2}} \left(c_1, c_m\right) \land
+            \varphi_{\frac{k}{2}} \left(c_m, c_2\right)\right)
+        \]
+        A truly brilliant solution, if only it was correct. The formula simply asks if there exists a configuration that
+        functions as the middle configuration of the run. Clearly $\eta = \varphi_t \left(c_0, c_{\text{acc}} \right)$
+        is true \textbf{if and only if} $M$ accepts $w$. Also, since $t$ is single exponential in $s \left(n\right)$
+        (that is $t = 2^{O \left(s \left(n\right)\right)}$, then the recursion depth in constructing the formula is
+        polynomial. \\
+        Well, the problem is that while the recursion depth is polynomial, the construction tree of the formula has
+        degree 2, which means that it’s a binary tree of polynomial depth, so it has an exponential number of nodes.
+        That is, the formula is still too big. How can we overcome this?
+
+        \textbf{Correct solution}: Here comes a clever trick, which is the crux of the proof (are we not all so
+        brilliantly bright?). Instead of asking whether there is a $c_m$ that works with $c_1$ and with $c_2$, we
+        combine these two cases into one, as follows: \[
+            \varphi_k \left(c_1, c_2\right) = \exists c_m \forall c_3, c_4 \left(\left(\left(c_3 = c_1\right) \land
+            \left(c_4 = c_m\right)\right) \lor \left(\left(c_3 = c_m\right) \land \left(c_4 = c_2\right)\right)\right)
+            \implies \varphi_{\frac{k}{2}} \left(c_3, c_4\right)
+        \]
+        Now the degree of the tree is 1, and it is still of polynomial depth, so the length of $\varphi$ is polynomial,
+        and so we are done.
+    \end{proof}
+\end{theorem}
+
+Note that we required that a TQF would have all its quantifiers in the beginning (this is sometimes called
+\textbf{prenex normal form}). However, our construction is in not in such a form, because of the condition on $c_3$ and
+$c_4$. This, however, is not a concern, because we can push the quantifiers out using the rules $\alpha \implies \exists
+x \beta \equiv \exists x \left(\alpha \implies \beta\right)$ and $\alpha \implies \forall x \beta \equiv
+\forall x \left(\alpha \implies \beta\right)$
+% section Encoding configurations using boolean formulas (end)
+
+
+
+\end{document}
