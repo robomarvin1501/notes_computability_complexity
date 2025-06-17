@@ -100,7 +100,7 @@ We will then use $D$ to build $\overline{D}$: \[
     \overline{D} \left(\left\langle M \right\rangle\right) = \overline{D \left(\left\langle M \right\rangle\right)}
 \]
 Which is to say, a swapping of $q_{\text{acc}} $ and $q_{\text{rej}} $. So, what does $\overline{D} \left(\left\langle
-\overline{D} \right\rangle\right)$ reutrn? \\
+\overline{D} \right\rangle\right)$ return? \\
 If $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) = q_{\text{acc}} $, then $D \left(\left\langle \overline{D}
 \right\rangle\right) = q_{\text{rej}} \implies H_f \left(\left\langle \overline{D} \right\rangle, \left\langle \overline{D}
 \right\rangle\right) = q_{\text{rej}} $, and so $\overline{D} \left(\left\langle \overline{D} \right\rangle\right) =
@@ -138,7 +138,7 @@ For every function $f$ that is computable in space $O \left(f\right)$ it is true
     \text{Space} \left(o \left(f \left(n\right)\right)\right) \subsetneq \text{Space}  \left(f \left(n\right)\right)
 \]
 The proof is almost identical to the proof for time, however we will simply replacement the time limitation at every
-point of the proof, with a limitation of space. The theorem is stronger for space (tighter spearation), since there
+point of the proof, with a limitation of space. The theorem is stronger for space (tighter separation), since there
 exists a UTM $Y$ that simulates $M \left(w\right)$ in space $O \left(f \left(n\right)\right)$ where $f \left(n\right)$
 is the space limitation of the run of $M$. \\
 We can limit the space, similarly to the timer, where we begin by adding a symbol to every cell in the tape that we are
