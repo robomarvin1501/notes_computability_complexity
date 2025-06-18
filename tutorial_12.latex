@@ -1,0 +1,296 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 12}
+\author{Gidon Rosalki}
+\date{2025-06-18}
+
+
+\begin{document}
+\maketitle
+\section{The Time Hierarchy Theorem}\label{sec:The Time Hierarchy Theorem} % (fold)
+\begin{definition}[Time-constructible]
+    A function $t: \N \to \N$ where $t \left(n\right) = \Omega \left(n \log \left(n\right)\right)$ is called
+    \textbf{time-constructible} of the function that maps $1^n$ ($n$ in unary form) to the binary representation of $t
+    \left(n\right)$ is computable in time $O \left(t \left(n\right)\right)$
+\end{definition}
+
+Note: All non linear polynomials with integer coefficients and non-negative leading coefficient are time-constructible,
+so are exponential functions such as $2^n$. \\
+
+\begin{example}[]
+    Is the function $n^2$ time-constructible?
+    \begin{proof}[Solution]
+        Given $n$ 1s written on the tape, we need to write $n^2$ 1s. We will use the following algorithm: \begin{enumerate}
+            \item Translate the input $1 \dots 1$ to the binary representation of $n$, twice
+            \item Multiply the two numbers together by "vertical multiplication"
+        \end{enumerate}
+        Time complexity: \begin{enumerate}
+            \item $n \log \left(n\right)$
+            \item $\log \left(n\right)^2$
+        \end{enumerate}
+        In total, this is $O \left(n^2\right)$, so this function is in fact time-constructible.
+    \end{proof}
+\end{example}
+
+Reminder: $f \left(n\right) = o \left(g \left(n\right)\right) \implies \displaystyle\lim_{n \to \infty}
+\displaystyle\frac{f \left(n\right)}{g \left(n\right)} = 0$
+We also have the following time hierarchy theorem, which we state here without a proof:
+\begin{theorem}[Time Hierarchy]
+    Let $t: \N \to \N$ be a time constructible function. Then there exists a language $L$, that is decidable in $O
+    \left(t \left(n\right)\right)$ time, but not decidable in $o \left(\displaystyle\frac{t \left(n\right)}{\log \left(t
+    \left(n\right)\right)}\right)$ time
+\end{theorem}
+
+\begin{corollary}[]
+    For any two real numbers $1 \leq \varepsilon_1 < \varepsilon_2$, we have TIME $\left(n^{\varepsilon_1}\right)
+    \subset$ TIME $\left(n^{\varepsilon_2}\right)$
+\end{corollary}
+
+\begin{corollary}[]
+    $P \subset $ EXPTIME
+    \begin{proof}[Proof ]
+        For every $k$, it holds that $n^k = O \left(2^n\right)$, so TIME $\left(n^k\right) \subset $ TIME
+        $\left(2^n\right)$, and therefore $P \subset $ TIME $\left(2^n\right)$. By the time hierarchy theorem, we know
+        that \[
+            \text{TIME}  \left(2^n\right) \subsetneq \text{TIME} \left(4^n\right) \subset \text{EXPTIME}
+        \]
+    \end{proof}
+\end{corollary}
+% section The Time Hierarchy Theorem (end)
+
+\section{The Space Hierarchy Theorem}\label{sec:The Space Hierarchy Theorem} % (fold)
+While with respect to time complexity simulation comes with a logarithmic overhead, the same is not true for space and
+so the analogous space hierarchy theorem is cleaner, and provides a tighter bound.
+
+\begin{definition}[Space-constructible]
+    A function $s: \N \to \N$ where $s \left(n\right) = \Omega \left(n\right)$ is called \textbf{space-constructible} if
+    the function that maps $1^n$ ($n$ in unary form) to the binary representation of $s \left(n\right)$ is computable in
+    space $O \left(s \left(n\right)\right)$
+\end{definition}
+\begin{theorem}[Space Hierarchy]
+    Let $s: \N \to \N$ be a space-constructible function. Then there exists a language $L$, that is decidable in $O
+    \left(s \left(n\right)\right)$ space, but not decidable in $o \left(s \left(n\right)\right)$ space
+\end{theorem}
+
+\begin{corollary}
+    SPACE $\left(n^k\right) \subsetneq $ SPACE $\left(n^{k + 1}\right)$ for all $k \geq 1$, and PSPACE $\subsetneq$
+    EXPSPACE
+\end{corollary}
+% section The Space Hierarchy Theorem (end)
+
+\section{Padding}\label{sec:Padding} % (fold)
+\begin{theorem}[The following are equivalent]
+    \begin{enumerate}
+        \item PSPACE = PTIME
+        \item $\exists k > 1 : \text{SPACE} \left(n^k\right) \subseteq \text{PTIME} $
+        \item SPACE $\left(n\right) \subseteq $ PTIME
+    \end{enumerate}
+
+    \begin{proof}[Proof ]
+        It is clear that if PSPACE = PTIME, then $\text{SPACE} \left(n^k\right) \subseteq \text{PSPACE} = \text{PTIME} $
+        for all $k \geq 1$. Also, if SPACE $\left(n^k\right) \subseteq $ PTIME, for some $k \geq 1$, then \[
+            \text{SPACE} \left(n\right) \subseteq \text{SPACE} \left(n^k\right) \subseteq \text{PTIME}
+        \]
+        It is left to prove that if SPACE $\left(n\right) \subseteq $ PTIME, then PSPACE = PTIME, and for this we use
+        the padding argument. \\
+        Assume that SPACE $\left(n\right) \subseteq $ PTIME, and consider a language $L \in PSPACE$. Let $f
+        \left(n\right) = n^k$ be such that $L \in \text{DSPACE} \left(f \left(n\right)\right)$. Consider the language \[
+            L' = \left\{w\#1^m : w \in L \land m = \left|w\right|^k\right\}
+        \]
+        It is not hard to see that $L' \in \text{SPACE } \left(n\right) \subseteq \text{PTIME} $. Indeed, $f
+        \left(n\right)= n^k $ is space constructible, and so we can first compute $\left|w\right|^k$, as long that the
+        space for the output does not exceed $m$ cells (and if it does, we will reject), and then compare
+        $\left|w\right|^k$ with $m$. If they are not equal, then we reject, and otherwise, if $m = \left|w\right|^k$,
+        then we decide whether $w \in L$ using \[
+            O \left(f \left(\left|w\right|\right)\right) = O \left(\left|w\right|^k\right) = O
+            \left(\left|w\#1^m\right|\right) = O \left(n\right)
+        \]
+        space. Thus, $L' \in \text{PTIME} $. It then follows that $L \in \text{PTIME} $: On input $w$, we first compute
+        $m = \left|w\right|^k$, in polynomial time in $\left|w\right|$, and then determine whether $w\#1^m \in L'$. The
+        latter can be done in polynomial time in $\left|w\#1^m\right| = O \left(\left|w\right|^k\right)$, which is
+        polynomial in $\left|w\right|$. Hence, $L \in \text{PTIME} $, and we are done.
+    \end{proof}
+\end{theorem}
+
+\begin{corollary}
+    For all $k \geq 1$, it holds that $\text{SPACE} \left(n^k\right) \ne \text{PTIME} $
+    \begin{proof}[Proof ]
+        By the previous lemma, $\text{SPACE} \left(n^k\right) = \text{PTIME} $ implies PSPACE = PTIME, which clearly
+        implies that \[
+            \text{SPACE} \left(n^{k  +1}\right) \subseteq \text{PSPACE} = \text{PTIME} = \text{SPACE} \left(n^k\right)
+        \]
+        The latter is a contradiction to the separation \[
+            \text{SPACE} \left(n^k\right) \subsetneq \text{SPACE} \left(n^{k + 1}\right)
+        \]
+        given by the space hierarchy theorem
+    \end{proof}
+\end{corollary}
+% section Padding (end)
+
+\section{Logarithmic space languages}\label{sec:Logarithmic space languages} % (fold)
+\begin{definition}[Logarithmic Space TM]
+    A logarithmic space TM is a TM with 3 tapes: \begin{enumerate}
+        \item Input tape: Read only tape, containing letters only from $\Sigma$
+        \item Working tape: May write any $\sigma \in \Gamma$, and utilise $O \left(\log \left(n\right)\right)$ space
+        \item Output tape: This tape is write only, and may have any letter $\sigma \in \Sigma$ written to it, and it
+            may only move right, or halt.
+    \end{enumerate}
+\end{definition}
+We may now define the following languages: \begin{gather*}
+    L = \text{SPACE}  \left(O \left(\log \left(n\right)\right)\right) \\
+    NL = \text{NSPACE}  \left(O \left(\log \left(n\right)\right)\right)
+\end{gather*}
+Remember your laws of logarithms, $\log \left(n^k\right) = k \log \left(n\right)$. Thus, for every polynomial $p$, it is
+true that $\log \left(p \left(n\right)\right) = O \left(\log \left(n\right)\right)$. This is why we do not take powers
+of $n$ in the log. However, note that $\log \left(n\right) = o \left(\log^2 \left(n\right)\right)$. So a machine that
+works in $\log^2 \left(n\right)$ does not belong to $L$. \\
+We have seen that \[
+    \text{SPACE}  \left(f \left(n\right)\right) \subseteq \text{TIME} \left(2^{O \left(f \left(n\right)\right)}\right)
+\]
+Thus, if $f = O \left(\log \left(n\right)\right)$, then \[
+    n \cdot 2^{O \left(f \left(n\right)\right)} = n \cdot 2^{O \left(\log \left(n\right)\right)} = n \cdot poly \left(n\right)
+\]
+We can conclude that $L \subseteq P$, and next week we will show that $NL \subseteq P$
+% section Logarithmic space languages (end)
+
+\section{NL-Completeness}\label{sec:NL-Completeness} % (fold)
+Similarly to the question of whether P = NP, we do not know whether L = NL. As we did in NP, we want to say on some
+problems in NL that they are the "hardest". Thus, we want to define the notion of NL-hardness. As we did in NP, we want
+to say that a problem is NL-hard if every other problem in NL is reducible to it. What kind of reductions should we use?
+This is a very important point, yet difficult to understand.
+
+\subsection{Log space reductions}\label{sub:Log space reductions} % (fold)
+\begin{definition}[Log space reducible]
+    We say that a language that $A$ is log-space reducible to $B$ if there exists a logarithmic space computable
+    function $f : \Sigma^* \to \Sigma^*$ such that $\forall w,\ w \in A \Leftrightarrow f \left(w\right) \in B$. In this
+    case we will say $A \leq_L B$.
+\end{definition}
+
+\begin{definition}[NL-hard]
+    We say that a language $L$ is NL-hard if $\forall L' \in NL,\ L' \leq_L L$. If in addition, $L \in NL$, then we say
+    that $L$ is NL-complete
+\end{definition}
+
+\begin{theorem}[Reduction theorem for LOGSPACE]
+    If $B \in L$, and $A \leq_L B$, then $A \in L$. If $B \in NL$, and $A \leq_L B$, then $A \in NL$. Similarly, if $A
+    \notin LNL$, and $A \leq_L B$, then $B \notin LNL$
+\end{theorem}
+
+\begin{corollary}
+    If $A \in$ NL-complete, and $A \in L$, then L = NL
+\end{corollary}
+
+\begin{theorem}[]
+    If $A \leq_L B$, and $B \leq_L C$, then $A \leq_L C$
+
+    \begin{proof}[Proof ]
+        Left as an exercise, it is similar to the proof of log space reductions
+    \end{proof}
+\end{theorem}
+% subsection Log space reductions (end)
+
+\subsection{Relations between classes}\label{sub:Relations between classes} % (fold)
+So far we have seen the following relations between classes. \[
+    L \subseteq NL \subseteq P \subseteq NP \subseteq \text{PSPACE} = \text{NPSPACE}  \subseteq EXP
+\]
+From the hierarchy theorems, we thus get that \[
+    L \subsetneq \text{PSPACE},\ P \subsetneq \text{EXP}
+\]
+And a non deterministic version of the hierarchy theorem shows that \[
+    NL \subsetneq \text{NPSPACE}  = \text{PSPACE}
+\]
+% subsection Relations between classes (end)
+% section NL-Completeness (end)
+
+\section{STRONGLY-CONNECTED is NL-Complete}\label{sec:STRONGLY-CONNECTED is NL-Complete} % (fold)
+A directed graph is strongly connected if every two nodes are connected by a directed path in each direction. We define
+the language \[
+    \text{STRONGLY-CONNECTED}  = \left\{\left\langle G \right\rangle : G \text{ is a strongly connected graph} \right\}
+\]
+and we claim that it is NL-complete. First, we will show that it is in NL, to do this we will use the Immerman theorem,
+which we will prove next week.
+
+\begin{theorem}[Immerman]
+    NL = coNL
+\end{theorem}
+
+We proved in the lecture that \[
+    \text{PATH}  = \left\{\left\langle G, s, t \right\rangle : G \text{ is a directed graph, and there exists a path
+    from $s$ to $t$} \right\}
+\]
+is NL-complete. As such, $\overline{\text{PATH} }$ is NL-complete. So $\overline{\text{PATH} } \in NL$. Thus, there
+exists an NTM, that given $\left\langle G, s, t \right\rangle$, accepts \textbf{if and only if} there is no path from
+$s$ to $t$, in $G$. Consider the following machine which recognises $\overline{\text{STRONGLY-CONNECTED} }$. \\
+Given an input $\left\langle G \right\rangle$: \begin{enumerate}
+    \item Non-deterministically select two nodes $a$, and $b$
+    \item Simulate the NTM that decides $\overline{\text{PATH} }$ on input $\left\langle G, a, b \right\rangle$. If it
+        accepts, then the graph is not strongly connected, so accept. Otherwise, reject
+\end{enumerate}
+Since storing node numbers $a$ and $b$ only takes logarithmic space, and $\overline{\text{PATH} }$ is recognised in
+logarithmic space, we get that $\overline{\text{STRONGLY-CONNECTED} } \in NL$. Again, from Immerman, we get that
+$\text{STRONGLY-CONNECTED}  \in NL$. \\
+Next, we show that every other language in NL is log-space reducible to STRONGLY-CONNECTED. We do this by reducing PATH
+(which is NL-complete) to STRONGLY-CONNECTED. Consider the following reduction: \\
+On input $\left\langle G, s, t \right\rangle$, where $G = \left(V, E\right)$, the reduction outputs $\left\langle G'
+\right\rangle$, where $G'$ is obtained from $G$ by adding, for every $v \in V$, the edges $\left(v, s\right)$ and
+$\left(t, v\right)$. \\
+We will claim that the reduction is correct, and that it can be done in log-space. \\
+
+\textbf{Correctness}: We need to show that if there is a path from $s$ to $t$ in $G$, then $G'$ is strongly connected.
+For $x, y \in V$ a path from $x$ to $y$ starts with the edge $\left(x, s\right)$, and then takes the path from $s$ to
+$t$, and then finally takes the edge $\left(t, y\right)$. \\
+Conversely, we need to show that if there is no path from $s$ to $t$, then $G'$ is not strongly connected. Indeed, we
+claim that $t$ is not reachable from $s$ in $G'$, since a simple path from $s$ to $t$ in $G'$ cannot use any of the new
+edges, and thus it is also a path in $G$. Since the only additional edges in the constructed graph go into $s$, and out
+of $t$, there can be no new ways of reaching $t$ from $s$. \\
+
+\textbf{Space}: We need to verify that the reduction can be performed by a log-space TM. A log-space TM can start by
+copying the input $G$, and for every vertex it writes, it also writes the two new edges. This is done vertex by vertex,
+and thus we always keep at most the encoding of a vertex, or an edge, on the tape. Both of these are logarithmic in the
+input. So the reduction TM will do the following: \begin{enumerate}
+    \item Copy all of $G$ onto the output tape
+    \item For  each node $i$ in $G$: \begin{enumerate}
+        \item Add an edge from $i$ to $s$
+        \item Add an edge from $t$ to $i$
+    \end{enumerate}
+\end{enumerate}
+So, the space used is indeed logarithmic, although the output has size $O \left(n\right)$, essentially the only space
+necessary to perform the reduction is that used to keep track of the node number $i$ in the above for loop.
+% section STRONGLY-CONNECTED is NL-Complete (end)
+
+\end{document}
