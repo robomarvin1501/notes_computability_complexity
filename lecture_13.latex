@@ -1,0 +1,224 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Lecture 13}
+\author{Gidon Rosalki}
+\date{2025-06-29}
+
+
+\begin{document}
+\maketitle
+
+The first few parts of this lecture will not be for the exam, however the latter parts will be.
+
+\section{Complexity sets, with randomness}\label{sec:Complexity sets, with randomness} % (fold)
+We want to extend the TM model such that we can use random algorithms, which include a runtime. This means that the
+results of the algorithm can be dependent on random coin flips. We will add to the TM a tape of random coins. At the
+start of a run, this tape will only include 1 or 0, in every cell, at equal probability, independently in each cell.
+
+We will define the complexity set for this TM machine.
+
+\begin{definition}[ZPP]
+    This is the set of all the language $L$ such that they have a TM $M$ that decides $L$, in an expected time that is
+    polynomial. That is to say, the runtime is on average (by the random coins), it is bound by a polynomial.
+\end{definition}
+
+\begin{theorem}[]
+    \[
+        P \subseteq ZPP
+    \]
+    \begin{proof}[Proof ]
+        If $L \in P$, then there is a deterministic polynomial TM that decides it. We can add to this machine a coins
+        tape, and so we get a machine that always runs in polynomial time, and thus also runs in expected polynomial
+        time.
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[RP]
+    The set RP contains all the languages $L$ such that there exists a TM $M$ that runs in polynomial time (always). It
+    holds that \begin{itemize}
+        \item $w \in L \implies \p \left[M \left(w\right) = q_{\text{acc}} \right] \geq \displaystyle\frac{1}{2}$
+        \item $w \notin L \implies \p \left[M \left(w\right) = q_{\text{rej}} \right] = 1$
+    \end{itemize}
+\end{definition}
+
+\begin{theorem}[]
+    \[
+        \text{RP} \subseteq \text{NP}
+    \]
+    \begin{proof}[Proof ]
+        We will consider the polynomial recogniser for a language in NP, in comparison to a machine that is RP. In both
+        cases: \begin{itemize}
+            \item The runtime is polynomial
+            \item If $w \notin L$, then it always holds that $M \left(w\right) = q_{\text{rej}} $
+            \item If $w \in L$ then there is a run such that $M \left(w\right) = q_{\text{acc}} $. In the RP machine,
+                the requirement is that half of the runs will return $q_{\text{acc}} $
+        \end{itemize}
+        Therefore, the RP machine is a specific case of a polynomial recogniser
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    P $\subseteq$ RP
+    \begin{proof}[Proof ]
+        In both cases, the machine runs in polynomial time. In both cases, the machine always responds $q_{\text{rej}}
+        $ in the case where $w \notin L$. The machine in P will always return $q_{\text{acc}} $ when $w \in L$, and this
+        means it returns $q_{\text{acc}} $ more than $\displaystyle\frac{1}{2}$ of the time.
+    \end{proof}
+\end{theorem}
+
+\begin{definition}[coRP]
+    The set coRP contains all the languages $L$ such that $\overline{L} \in $ RP. Or, in other words, $L \in \text{coRP}
+    $ \textbf{if and only if} there exists a TM $M$ for $L$ such that: \begin{itemize}
+        \item $M$ always runs in polynomial time
+        \item For every $w \in L$, $M \left(w\right) = q_{\text{acc}} $
+        \item For every $w \notin L$, it holds that $\p \left[M \left(w\right) = q_{\text{rej}} \right] \geq
+            \displaystyle\frac{1}{2}$
+    \end{itemize}
+\end{definition}
+Explanation: \begin{align*}
+    L \in \text{coRP} &\Leftrightarrow \overline{L} \in \text{RP}  \\
+                      &\Leftrightarrow \text{There is an RP machine for } \overline{L} \\
+                      &\Leftrightarrow \text{There is a coRP machine for } L
+\end{align*}
+Where the final transition is possible from swapping the $q_{\text{acc}} $ and $q_{\text{rej}} $ states.
+
+\begin{theorem}[]
+    \[
+        \text{RP} \cap \text{coRP} = \text{ZPP}
+    \]
+    \begin{proof}[Proof ]
+        Below
+    \end{proof}
+\end{theorem}
+
+
+\begin{definition}[]
+    The set BPP contains all the languages $L$ such that there is a TM $M$ that runs in polynomial time, that correctly
+    answers $\geq \displaystyle\frac{2}{3}$ (both ways, both for in and not in)
+\end{definition}
+This is to say: \begin{gather*}
+    w \in L \implies \p \left[M \left(w\right) = q_{\text{acc}} \right] \geq \displaystyle\frac{2}{3} \\
+    w \notin L \implies \p \left[M \left(w\right) = q_{\text{rej}} \right] \geq \displaystyle\frac{2}{3}
+\end{gather*}
+
+\begin{exercise}
+    \[
+        \text{P}  \subseteq \text{BPP}
+    \]
+    \begin{proof}[Solution]
+        In both cases, the machine runs in polynomial time, and a deterministic polynomial machine that decides $L$ will
+        necessarily guarantee that the probability to respond correctly is always greater than
+        $\displaystyle\frac{2}{3}$.
+    \end{proof}
+\end{exercise}
+
+\begin{theorem}[]
+    \[
+        \text{BPP}  \subseteq \text{EXP}
+    \]
+    \begin{proof}[Proof ]
+        Let there be $L \in $ BPP, and $M$ a BPP machine for $L$. We will use $M$ to build $M'$, that decides $L$ in
+        exponential time. \\
+        $M'$ will run as follows: \\
+        Run over all the options for random coin flips. For every possibility (for a string over $\left\{0, 1\right\}$),
+        $M'$ will run $M \left(w\right)$. $M'$ will count how many times it receives $q_{\text{acc} }$, and answer
+        according to the majority. \\
+        \textbf{Correctness}: Trivial, since a run over a particular coin tape is deterministic. \\
+        \textbf{Runtime}: Every run of $M \left(w\right)$ requires polynomial time. There are $2^l$ runs, where $l$ is
+        the number of cells on the coin tape. However, since $M$ runs in polynomial time, it can only manage to read at
+        most a polynomial number of coins, which is to say $l \leq poly \left(n\right)$, and so in total the runtime of
+        $M'$ is \[
+            \leq poly \left(n\right) \cdot 2^{poly \left(n\right)}
+        \]
+        which is to say, limited by an exponential value of $n$.
+    \end{proof}
+\end{theorem}
+
+Our next theorem is that RP $\subseteq$ BPP. However, we will first show that the size of the mistake is a constant, as
+small as we would like. We will write $RP \left(p\right)$ like the set RP, but with the one way mistake $\leq p$.
+Therefore, RP $= RP \left(\displaystyle\frac{1}{2}\right)$
+
+\begin{theorem}[]
+    \[
+        RP = RP \left(\displaystyle\frac{1}{2}\right) = RP \left(\displaystyle\frac{1}{4}\right)
+    \]
+    Which is to say $L \in RP$ \textbf{if and only if} there is a TM that runs in polynomial time, and enables \begin{gather*}
+        w \in L \implies \p \left[M \left(w\right) = q_{\text{acc}} \right] \geq \displaystyle\frac{3}{4}  \\
+        w \notin L \implies \p \left[M \left(w\right) = q_{\text{rej}} \right] = 1
+    \end{gather*}
+
+    \begin{proof}[Proof ]
+        It is clear that $RP \left(\displaystyle\frac{1}{4}\right) \subseteq RP \left(\displaystyle\frac{1}{2}\right)$.
+        We now need to show that $RP \left(\displaystyle\frac{1}{2}\right) \subseteq RP
+        \left(\displaystyle\frac{1}{4}\right)$: Let there be $L \in RP$, which is to say that there exists a TM $M$ that
+        runs in polynomial tie, and there is a one way failure of probability $\leq \displaystyle\frac{1}{2}$. We will
+        use it to make a TM $M'$ that runs in polynomial time, with one way failure probability $\leq
+        \displaystyle\frac{1}{4}$. \\
+        \textbf{Construction}: $M'$ will run as follows: Run $M \left(w\right)$ twice, and return $q_{\text{rej}} $
+        \textbf{if and only if} in both runs $M \left(w\right) = q_{\text{rej}} $.
+        \textbf{Runtime}: Trivial, runtime of $M$ is polynomial, and so too the runtime of $M'$ \\
+        \textbf{Correctness}: If $w \notin L$, then it always holds that $M \left(w\right) = q_{\text{rej}} $, and so
+        $M' \left(w\right)= q_{\text{rej}} $. If $w \in L$, then $\p $
+        \begin{gather*}
+            w \notin L \implies \p \left[M \left(w\right) = q_{\text{rej}} \right] = 1 \implies \p \left[M'
+            \left(w\right) = q_{\text{rej}} \right]= 1 \\
+            w \in L \implies \p \left[M \left(w\right) = q_{\text{rej}} \right] \leq \displaystyle\frac{1}{2} \implies
+            \p \left[M' \left(w\right) = q_{\text{rej}} \right] \leq \left(\displaystyle\frac{1}{2}\right)^2 = \displaystyle\frac{1}{4}
+        \end{gather*}
+    \end{proof}
+\end{theorem}
+
+So, to return to the theorem we wanted
+
+\begin{theorem}[]
+    \[
+        RP \subseteq BPP
+    \]
+    \begin{proof}[Proof ]
+        Through the above theorem:
+        \begin{align*}
+            RP &= RP \left(\displaystyle\frac{1}{3}\right)
+        \end{align*}
+        Which is to say, theer is a polynomial TM with a one way failure rate that is $\leq \displaystyle\frac{1}{3}$,
+        which is a specific case of a machine BPP, where we can have a two way failures rate of $\leq
+        \displaystyle\frac{1}{3}$.
+    \end{proof}
+\end{theorem}
+
+% section Complexity sets, with randomness (end)
+
+\end{document}
