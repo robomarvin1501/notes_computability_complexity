@@ -42,7 +42,12 @@
 \begin{document}
 \maketitle
 
-The first few parts of this lecture will not be for the exam, however the latter parts will be.
+\begingroup
+\centering
+{\color{red}\bfseries\LARGE This content will not appear in the exam this year! \par}
+\endgroup
+
+\vspace{1cm}  % Add space before the rest of the content
 
 \section{Complexity sets, with randomness}\label{sec:Complexity sets, with randomness} % (fold)
 We want to extend the TM model such that we can use random algorithms, which include a runtime. This means that the
@@ -216,6 +221,109 @@ So, to return to the theorem we wanted
         Which is to say, theer is a polynomial TM with a one way failure rate that is $\leq \displaystyle\frac{1}{3}$,
         which is a specific case of a machine BPP, where we can have a two way failures rate of $\leq
         \displaystyle\frac{1}{3}$.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    \[
+        coRP \subseteq BPP
+    \]
+    \begin{proof}[Proof ]
+        \begin{theorem}[]
+            BPP is closed to inverse, which is to say BPP = coBPP.
+            \begin{proof}[Proof ]
+                By swapping the states $q_{\text{acc}} $ and $q_{\text{rej}} $, on a BPP machine, we get a BPP machine
+                for the inverse language
+            \end{proof}
+        \end{theorem}
+
+        So from that helpful theorem, we can now show:
+        \begin{align*}
+            L \in coRP &\implies \overline{L} \in RP \\
+                       &\implies \overline{L} \in BPP \\
+                       &\implies L \in BPP
+        \end{align*}
+    \end{proof}
+\end{theorem}
+
+What about NP? \begin{align*}
+    P \subseteq ZPP \subseteq RP \subseteq NP \subseteq EXP
+\end{align*}
+
+We are left with the theorem that we did not prove earlier:
+\begin{theorem}[]
+    \[
+        \text{RP} \cap \text{coRP} = \text{ZPP}
+    \]
+    \begin{proof}[Proof ]
+        We will assume that $L \in RP \cap coRP$, and show that $L \in ZPP$. That is to say that there is an RP machine
+        for $L$, and that there is a coRP machine for $L$. Both machines run in polynomial time, both with a (different)
+        one way failure rate. \begin{table}[H]
+             \centering
+             \begin{tabular}{|c|c|c|}
+                 \hline
+                  & $M_1$ & $M_2$ \\ \hline
+                 $w \in L$ & $\p \left[M_1 \left(w\right) = q_{\text{acc}} \right] \geq \frac{1}{2}$ &  $\p \left[M_2 \left(w\right) = q_{\text{acc}} \right] = 1$\\ \hline
+                 $w \notin L$ & $\p \left[M_1 \left(w\right) = q_{\text{rej}} \right] = 1$ & $\p
+                 \left[M_2 \left(w\right) = q_{\text{rej}} \right] \geq \frac{1}{2}$ \\ \hline
+             \end{tabular}
+             \caption{}
+        \end{table}
+        We want to show with $M_1$ and $M_2$ to create $M$ which is a ZPP machine for $L$. This is to say,
+        \textbf{always} responds correctly.  The runtime of $M$ has the expected runtime of polynomial (by the coins).
+        \\
+        \textbf{Construction}: $M$ will run as follows: \begin{enumerate}
+            \item Run $M_1 \left(w\right)$. If $M_1$ responds $q_{\text{acc}} $, then return $q_{\text{acc}} $
+            \item Run $M_2 \left(w\right)$. If $M_2$ responds $q_{\text{rej}} $, then return $q_{\text{rej}} $
+            \item Return to (1)
+        \end{enumerate}
+        \textbf{Correctness}: If in some step, $M_1 \left(w\right) = q_{\text{acc}} $, then necessarily $w \in L$, and
+        therefore the response of $M$ is correct. If in some step $M_2 \left(w\right) = q_{\text{rej}} $, then
+        necessarily $w \notin L$, and therefore the response of $M$ is correct. \\
+        \textbf{Runtime}: We will assume that $w \in L$. The runtime of $M$ is the runtime of both the machines, times
+        the number of times that $M_1 \left(w\right)$ will return $q_{\text{rej}} $. We will use $i$ to mark the number
+        of times that this occurred. \[
+            \p \left[M \left(w\right) = q_{\text{rej}} \right] \leq \displaystyle\frac{1}{2}
+        \]
+        Therefore \[
+            \p \left[\# \left(M \left(w\right) = q_{\text{rej}} \right) = i\right] \leq
+            \left(\displaystyle\frac{1}{2}\right)^i
+        \]
+        and so the expected runtime is \begin{align*}
+            \leq \displaystyle\sum_{i = 0}^{\infty} \left(\displaystyle\frac{1}{2}\right)^i \cdot poly \left(n\right)
+            \cdot i &= \theta \left(1\right) \cdot poly \left(n\right) \\
+                    &= poly \left(n\right)
+        \end{align*}
+        So we have shown that $L \in RP \cap coRP \implies L \in ZPP$. \\
+
+        We will now show \[
+            L \in ZPP \implies L \in RP \cap coRP
+        \]
+        We will begin from $L \in ZPP \implies L \in RP$. That is to say, there is a TM $M$ that decides $L$ in
+        polynomial time (on average), which we can use to build a TM $M_1$ that always runs in polynomial time, with a
+        one way failure rate $\leq \displaystyle\frac{1}{2}$. To resolve this, we will recall Markov's inequality. For
+        some non negative random variable $X$, \[
+            \p \left[X > a \cdot \E \left[X\right]\right] \leq \displaystyle\frac{1}{a}
+        \]
+        We will build $M_1$ as follows: $M_1$ will run $M \left(w\right)$ with a counter for the number of steps, and
+        will stop the run should it require more than $2 \cdot \E \left[\# \left(\text{number of steps} \right)\right]$.
+        If $M$ stopped before this, $M_1$ will return its response, and if $M$ does not stop, then $M_1$ will return
+        $q_{\text{rej}} $. \\
+        \textbf{Runtime}: The runtime of $M_1$ is $2$ times the expected value of the runtime of $M$, and so is
+        polynomial in $n$. \\
+        \textbf{Correctness}: \begin{gather*}
+            w \notin L \implies \p \left[M_1 \left(w\right) = q_{\text{rej}} \right] = 1 \\
+        \end{gather*}
+        If $w \in L$, then $M_1$ responds correctly \textbf{if and only if} $M \left(w\right)$ finishes running in time
+        $\leq 2 \cdot$ the expected value, which is to say that $M$ responds incorrectly \textbf{if and only if} the
+        runtime of $M \left(w\right) > 2 \cdot \E$. According to Markhov's inequality, this happens with a probability
+        $\leq \displaystyle\frac{1}{2}$. This is to say, if $w \in L$, then \[
+            \p \left[M' \left(w\right) = q_{\text{acc}} \right] \geq \displaystyle\frac{1}{2}
+        \]
+        We have finished showing that $ZPP \subseteq RP$. We need to show that $ZPP \subseteq coRP$, and then derive
+        that $ZPP \subseteq RP \cap coRP$. In order to show that $ZPP \subseteq coRP$ we will build a coRP machine $M_2$
+        . The construction is almost exactly the same as $M_1$, but instead if we stop the machine for counting too
+        high, then $M_2$ will return $q_{\text{acc}} $
     \end{proof}
 \end{theorem}
 
