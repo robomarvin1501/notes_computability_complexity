@@ -73,7 +73,7 @@ jobs:
           <body>
               <h1>Lecture Notes</h1>
               <ul>" > public/index.html
-          for file in public/*.pdf; do
+          for file in $(ls public/*.pdf | sort -V); do
             filename=$(basename "$file")
             echo "<li><a href='$filename'>$filename</a></li>" >> public/index.html
           done
