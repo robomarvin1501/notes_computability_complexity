@@ -183,7 +183,7 @@ Reminder: A boolean expression will be called CNF if it is of the following stru
 within each statement is boolean variables separated by logical ors. Between each statement, are logical ands. An
 expression will be called 3CNF if in each statement there are exactly 3 literals, which is to say 3 variables. An
 expression $\varphi$ will be called satisfying \textbf{if and only if} there is a placement that satisfies the variables, which
-is to say, a placement of the values True or false on teh variables such that the overall result of $\varphi$ is true.
+is to say, a placement of the values True or false on the variables such that the overall result of $\varphi$ is true.
 
 \begin{theorem}[]
     \[

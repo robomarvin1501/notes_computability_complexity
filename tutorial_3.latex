@@ -247,7 +247,7 @@ So going back to the previous example, $L$ has 3 different MN equivalence classe
     The language $L = \left\{w \in \left\{a, b\right\}^* : \#_a \left(w\right) \geq \#_b \left(w\right)\right\}$ is not
     regular.
     \begin{proof}[Proof ]
-        Let us assume the contradiction that it is regular, and therefore tehre exists an automaton that decides $L$,
+        Let us assume the contradiction that it is regular, and therefore there exists an automaton that decides $L$,
         with $k$ states. Consider the following $k + 1$ words: $\varepsilon, a, aa, \dots, a^k$. Since there are $k +
         1$, by the pigeonhole principle, 2 must reach the same state. Let there be such a pair $a^i$,
         $a^j$, and we will assume without loss of generality that $i < j$. We will choose $z = b^j$. So $z$ is a
