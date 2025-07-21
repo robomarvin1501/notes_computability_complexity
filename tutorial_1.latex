@@ -334,7 +334,7 @@ string so far is positive or negative. We can do this by defining $A' =
         a\right), 1 - p\right)$
     \item The initial state is $\left(q_0, 0\right)$
     \item $F' = \left\{\left(q, 0\right) : q \in F\right\}$, which is all the
-        accepting states of the original automaton, but ensuring htat they have
+        accepting states of the original automaton, but ensuring that they have
         an even number of bits.
 \end{itemize}
 
