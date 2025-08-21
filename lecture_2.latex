@@ -203,7 +203,7 @@ run that identifies it in the original NFA will also identify it in our new NFA.
 \end{example}
 
 \begin{example}[]
-    $L_3 = \left\{\text{All the words that may be made from} ababb \text{ by deleting some or all of the letters}
+    $L_3 = \left\{\text{All the words that may be made from } ababb \text{ by deleting some or all of the letters}
     \right\}$. For example, $aa \in L_3$.
     \begin{proof}[Solution]
         To achieve this we will add the epsilon path to each of the nodes, which
@@ -219,14 +219,14 @@ run that identifies it in the original NFA will also identify it in our new NFA.
                 \node[state, accepting, right of=q4] (q5) {$q_5$};
 
                 \draw   (q0) edge[->, bend left, above] node{a} (q1)
-                        (q0) edge[->, bend right, above] node{$\varepsilon$} (q1)
+                        (q0) edge[->, bend right, below] node{$\varepsilon$} (q1)
                         (q1) edge[->, bend left, above] node{a} (q2)
-                        (q1) edge[->, bend right, above] node{$\varepsilon$} (q2)
+                        (q1) edge[->, bend right, below] node{$\varepsilon$} (q2)
                         (q2) edge[->, bend left, above] node{a} (q3)
-                        (q2) edge[->, bend right, above] node{$\varepsilon$} (q3)
+                        (q2) edge[->, bend right, below] node{$\varepsilon$} (q3)
                         (q3) edge[->, bend left, above] node{a} (q4)
-                        (q3) edge[->, bend right, above] node{$\varepsilon$} (q4)
-                        (q4) edge[->, bend right, above] node{$\varepsilon$} (q5)
+                        (q3) edge[->, bend right, below] node{$\varepsilon$} (q4)
+                        (q4) edge[->, bend right, below] node{$\varepsilon$} (q5)
                         (q4) edge[->, bend left, above] node{a} (q5);
             \end{tikzpicture} \\
         \end{center}
