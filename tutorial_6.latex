@@ -1,0 +1,254 @@
+\documentclass[a4paper]{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\C}{\ensuremath{\mathcal{C}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 6}
+\author{Gidon Rosalki}
+\date{2025-05-07}
+
+
+\begin{document}
+\maketitle
+
+\section{R, RE, coRE}\label{sec:R, RE, coRE} % (fold)
+\subsection{Definitions and reminders}\label{sub:Definitions and reminders} % (fold)
+
+\begin{definition}[R]
+    \[
+        R \stackrel{def}{=} \left\{L : \text{There exists a TM that decides } L\right\}
+    \]
+    Decides means that it stops on \textbf{every} input
+\end{definition}
+\begin{definition}[RE]
+    \[
+        RE \stackrel{def}{=} \left\{L : \text{There exists a TM that recognises } L\right\}
+    \]
+    Recognises means that it stops on all inputs that are in the language
+\end{definition}
+
+\begin{definition}[coRE]
+    \[
+        coRE \stackrel{def}{=} \left\{L : \text{There exists a TM that recognises } \overline{L}\right\}
+    \]
+\end{definition}
+
+\begin{theorem}[]
+    \[
+        RE \cap coRE = R
+    \]
+\end{theorem}
+
+\begin{definition}[Reduction]
+    A reduction from $A \subseteq \Sigma^*$ to $B \subseteq \Sigma^*$ is a computable function $f: \Sigma^* \to
+    \Sigma^*$ such that \[
+        w \in A \Leftrightarrow f \left(w\right) \in B
+    \]
+\end{definition}
+% subsection Definitions and reminders (end)
+
+\subsection{Reduction theorem}\label{sub:Reduction theorem} % (fold)
+
+\begin{theorem}[Reduction theorem]
+    If $L' \leq_m L$, then all the following are true: \begin{enumerate}
+        \item $L \in R \implies L' \in R$
+        \item $L \in RE \implies L' \in RE$
+        \item $L \in CO-RE \implies L' \in CO-RE$
+    \end{enumerate}
+
+    \begin{proof}[Proof ]
+        Homework 5
+    \end{proof}
+\end{theorem}
+
+From this \begin{align*}
+    HALT &\leq_m A_{TM} \land HALT \notin R \\
+         &\implies A_{TM} \notin R
+\end{align*}
+
+
+\pagebreak
+We previously defined \[
+    ALL_{TM} \stackrel{def}{=} \left\{\left\langle M \right\rangle : L \left(M\right) = \Sigma^*\right\}
+\]
+We will prove that this language is outside of $RE$ and $coRE$
+\begin{theorem}[]
+    \[
+        ALL_{TM} \in \overline{RE \cup coRE}
+    \]
+    \begin{proof}[Proof ]
+        We will start by showing that $ALL \notin coRE$. Firstly, we will note that $HALT \leq_m ALL$, since $HALT
+        \notin coRE$ follows from the reduction theorem. Let us construct the reduction $f \left(\left\langle M, w
+        \right\rangle \right) = \left\langle M' \right\rangle$, where $M'$ operates as follows on the input $x \in
+        \Sigma^*$: \begin{enumerate}
+            \item Remove $x$ from the tape, and write $w$
+            \item Run $M$ on $w$
+            \item If $M$ halts during the run, accept
+        \end{enumerate}
+        The correctness of this reduction follows from \begin{enumerate}
+            \item Suppose that $\left\langle M, w \right\rangle \in HALT_{TM}$. Then $M$ halts on $w$. Therefore, given
+                any $x$, after running $M$ on $w$, $M'$ accepts, so $\left\langle M' \right\rangle \in ALL{TM}$
+            \item Suppose that $\left\langle M, w \right\rangle \notin HALT_{TM}$. Then $M$ does not halt on $w$.
+                Therefore, given any $x$, $M'$ does not halt, and $x \notin L \left(M'\right)$. Thus $L \left(M'\right)
+                = \emptyset \ne \Sigma^* \implies \left\langle M' \right\rangle \notin ALL_{TM}$
+        \end{enumerate}
+        The computability is as follows: $M'$ deletes any input, overrides with $w$, and runs $M$ on $w$. It is possible
+        to encode such a machine using procedures we have seen. \\
+
+        Next we will show that $\overline{HALT_{TM}} \leq ALL_{TM}$. Since $\overline{HALT_{TM}} \in coRE \setminus R$,
+        we have $\overline{HALT_{TM}} \notin RE$, and so $ALL_{TM} \notin RE$. \\
+        Construction: Let $f \left(\left\langle M, w \right\rangle \right) = \left\langle M' \right\rangle$, where $M'$
+        operates as follows on the input $x \in \Sigma^*$: \begin{enumerate}
+            \item Run $M$ on the word for $\left|x\right|$ steps
+            \item If $M$ halts during the run, reject, otherwise, accept
+        \end{enumerate}
+        Correctness: \begin{itemize}
+            \item Suppose $\left\langle M, w \right\rangle \in \overline{HALT_{TM}}$. Then $M$ does not halt on $w$.
+                Therefore, after running $M$ for $\left|x\right|$ steps, $M'$ accepts. This is true for every $x$, and
+                so $\left\langle M' \right\rangle \in ALL_{TM}$
+            \item Suppose $\left\langle M, w \right\rangle \notin \overline{HALT_{TM}}$. Then $M$ halts on $w$ after
+                some finite number of steps. Therefore, for a sufficiently long input $x$, $M'$ finds that $M$ accepts
+                $w$, and rejects $x$. So $\left\langle M' \right\rangle \notin ALL_{TM}$
+        \end{itemize}
+        Computability: $M'$ runs $M$ on $w$, with a step counter limited to $\left|x\right|$. It is possible to encode
+        such a machine only using procedures that we have seen.
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    \[
+        REG_{TM} \stackrel{def}{=} \left\{\left\langle M \right\rangle : L \left(M\right) \in REG\right\} \in
+        \overline{RE \cup coRE}
+    \]
+
+    \begin{proof}[Proof ]
+        We will show that $REG_{TM} \notin coRE$ by a reduction from $HALT_{TM}$. The proof that $REG_{TM} \notin RE$ is
+        left as an exercise for the reader. \\
+        \begin{itemize}
+            \item Construction: Let $f \left(\left\langle M, w \right\rangle\right) = \left\langle M' \right\rangle$,
+                where $M'$ operates as follows on the input: \begin{itemize}
+                    \item If $x = a^n b^n$ for some $n \geq 0$, then accept
+                    \item Run $M$ on $w$. If it halts, then accept
+                \end{itemize}
+            \item Correctness: \begin{itemize}
+                    \item Suppose $\left\langle M, w \right\rangle \in HALT_{TM}$. Therefore, $M$ halts on $w$.
+                        Therefore, $M'$ accepts every input $x$, and so $L \left(M'\right)= \Sigma^*$, which is regular,
+                        hence $\left\langle M' \right\rangle \in REG_{TM}$
+                    \item Suppose $\left\langle M, w \right\rangle \notin HALT_{TM}$, which is to say, that $M$ does not
+                        halt on $w$. Therefore, $M'$ accepts $x$ \textbf{if and only if} it is of the form $a^nb^n$,
+                        which we have already shown to not be a regular language, and so $\left\langle M' \right\rangle
+                        \notin REG_{TM}$
+                \end{itemize}
+            \item Computability: $M'$ checks whether the input is of the form $a^nb^n$, and runs $M$ on $w$. It is
+                possible to encode such a machine using procedures we have seen
+        \end{itemize}
+    \end{proof}
+\end{theorem}
+% subsection Reduction theorem (end)
+
+\subsection{Hard and complete languages}\label{sub:Hard and complete languages} % (fold)
+\begin{definition}[]
+    For every class $\mathcal{C} \in \left\{R, RE, coRE\right\}$, a language $L$ is called $\mathcal{C}$-hard if for
+    every $K \in \mathcal{C}$ we have $K \leq_m L$. A language is called $\mathcal{C}$-complete if it is
+    $\mathcal{C}$-hard, and also $L \in \mathcal{C}$
+\end{definition}
+The intuition here is that $\C$-hard is "at least as hard as every language in $\C$", and $\C$-complete is "the hardest
+language in $\C$".
+
+\begin{theorem}[]
+    If $L$ is $\C$-hard, and $L \leq_m K$, then $K$ is $\C$-hard
+    \begin{proof}[Proof ]
+        Exercise for the reader
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    If $L$ is $RE$-hard, then $L \notin coRE$
+    \begin{proof}[Proof ]
+        Let $L \in coRE$, and let $L$ be $RE$-hard. Since $L$ is $RE$-hard, and $HALT_{TM} \in RE$, therefore $HALT_{TM}
+        \leq_m L$. Therefore $\overline{HALT_{TM}} \leq_m \overline{L}$, but $\overline{L} \in RE$, and
+        $\overline{HALT_{TM}} \notin RE$, contradicting the reduction theorem
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[]
+    $L$ is $RE$-complete \textbf{if and only if} $\overline{L}$ is $coRE$-complete
+    \begin{proof}[Proof ]
+        \begin{enumerate}
+            \item $L \in RE \implies \overline{L} \in coRE$
+            \item $L$ is $RE$-hard $\implies$ for every $k \in RE$, it is true that $K \leq_m L$. Let there be a
+                language $k' \in coRE$, $\overline{k'} \in RE$, then \begin{align*}
+                    \overline{k'} \leq_m L &\implies k' \leq_m \overline{L}
+                \end{align*}
+                and so $\overline{L}$ is $coRE$-hard
+
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[USELESS]
+    \[
+        U = USELESS = \left\{\left\langle M \right\rangle : \text{ there exists a state } q \notin \left\{q_{\text{acc} },
+        q_{\text{rej} }\right\} \text{ in } M \text{ that is never reached on any input} \right\}
+    \]
+    $U$ is $coRE$-complete
+
+    \begin{proof}[Proof ]
+        \begin{enumerate}
+            \item $U \in coRE$: We will show a machine $M$ that recognises $\overline{U}$. \\
+                Construction: Given an input $\left\langle M \right\rangle$, we can run a TM $T$ across all inputs in
+                parallel, while keeping track of the visited states. If at any point every state was visited, then
+                $\left\langle M \right\rangle \notin U$, and we reject. Otherwise, we do not halt. We want to show that
+                $L \left(T\right) = \overline{U}$. \begin{itemize}
+                    \item If $\left\langle M \right\rangle \in U$, then there exists a state $q$ that was never visited,
+                        for the run of $M$ over any word $w$, thus $T$ does not stop, and it does not accept
+                        $\left\langle M \right\rangle$, and so $\left\langle M \right\rangle \notin L \left(T\right)$
+                    \item If $\left\langle M \right\rangle \notin U$, then every state $q$ in $Q_M$ can be reached. For
+                        each state $q$, there exists some input w and a step number $n \geq 0$ where $M$, running on $q$,
+                        reaches $q$. Since $M$ has only finitely many states, there are finitely many such words and step
+                        numbers. We choose the longest word and the largest step number needed to reach all states —
+                        call this number $k$. On the $k$th iteration, $T$ will detect that every state in $M$ has been visited
+                        and will accept. Thus, $\left\langle M \right\rangle \in L \left(T\right)$
+                \end{itemize}
+
+            \item $U$ is $coRE$-hard. To show this we will show that $\overline{A_{TM}} \leq_m U$. Since
+                $\overline{A_{TM}}$ is $coRE$-hard, so too is $U$ from transitivity of reduction. % TODO prop 8 pt 2
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+% subsection Hard and complete languages (end)
+% section R, RE, coRE (end)
+
+\end{document}

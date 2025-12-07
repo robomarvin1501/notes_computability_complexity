@@ -1,0 +1,290 @@
+\documentclass[a4paper]{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 4 - Turing machines}
+\author{Gidon Rosalki}
+\date{2025-04-23}
+
+
+\begin{document}
+\maketitle
+\section{Motivation}\label{sec:Motivation} % (fold)
+\begin{table}[h!]
+     \centering
+     \begin{tabular}{|c|c|c|}
+         \hline
+          & DFA & Turing Machine \\ \hline
+         Reading the word & Once in order & Freely, any direction, as long as it likes \\ \hline
+         External memory & False & True \\ \hline
+     \end{tabular}
+     \caption{TM vs DFA}
+ \end{table}
+
+ This makes TMs a more powerful computational model. The memory of a TM is a tape of cells that stretches infinitely in
+ both directions. Each cell contains a letter. Initially the input is written on the tape, and every other cell contains
+ a default blank symbol, denoted \textvisiblespace. The machine’s head initially points to the first letter of the
+ input.
+% section Motivation (end)
+
+\section{Examples}\label{chap:Examples} % (fold)
+The following TM accepts if the second letter of the input is $a$, and deletes the first 2 letters of the input:
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, above right of=q1] (qacc) {$q_{\text{acc} }$};
+        \node[state, below right of=q1] (qrej) {$q_{\text{rej} }$};
+
+
+        \draw   (q0) edge[->, bend left, above] node{a, \textvisiblespace, R} (q1)
+                (q0) edge[->, bend right, below] node{b, \textvisiblespace, R} (q1)
+                (q0) edge[->, above] node{\textvisiblespace, \textvisiblespace, R} (q1)
+                (q1) edge[->, above left] node{a, \textvisiblespace, R} (qacc)
+                (q1) edge[->, below left] node{b, \textvisiblespace, R} (qrej)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+The following TM does not halt, but instead fills the tape with an endless string of $b$s, and overwrites the first
+letter of input with $b$.
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+
+
+        \draw   (q0) edge[->, loop above] node{a, b, \textvisiblespace $\to$ b, L} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+The following DFA recognises the language $L = \left\{w \in \left\{a, b\right\}^* : w \left[-1\right] = a\right\}$:
+
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, accepting, right of=q0] (q1) {$q_1$};
+
+
+        \draw   (q0) edge[loop above] node{b} (q0)
+                (q1) edge[loop above] node{a} (q1)
+                (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+% TODO equivalent TM
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+
+
+        \draw   (q0) edge[loop above] node{b} (q0)
+                (q1) edge[loop above] node{a} (q1)
+                (q0) edge[->, bend left, above] node{a} (q1)
+                (q1) edge[->, bend left, below] node{b} (q0)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+ % section Examples (end)
+
+\section{Formal definition}\label{sec:Formal definition} % (fold)
+\begin{definition}[Turing maching]
+    A Turing machine is comprised as follows: \[
+        M = \left(\Sigma, \Gamma, \text{\textvisiblespace}, Q, q_0, F, \delta\right)
+    \]
+    Where \begin{itemize}
+        \item $\Sigma$ - Finite set of input alphabet
+        \item $\Gamma$ - Finite set, working alphabet, $\Sigma \subseteq \Gamma$
+        \item \textvisiblespace - Space: \textvisiblespace $\in \Gamma \setminus \Sigma$
+        \item $W$ - States (finite, non empty)
+        \item $q_0$ - Starting state
+        \item $F$ - Final states
+        \item $\delta$ - Transition function such that $\delta : \left(Q \setminus F\right) \times \Gamma \to Q \times
+            \Gamma \times \left\{R, L\right\}$
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Configuration]
+    A \textbf{configuration} is made up of the current state, the state of the tape, and the position of the head. If
+    the tape is in state $x_1 \dots x_n$, the machine is in state $q$, and the head is over $x_i$, then we represent the
+    configuration as follows: \[
+        x_1 \dots x_{i - 1} q x_{i} x_{i + 1} \dots x_n
+    \]
+\end{definition}
+
+\begin{definition}[Run]
+    A \textbf{run} of a TM M on $w \in \Sigma^*$ is a finite or infinite sequence of configurations $c_1, \dots, c_T$
+    (where when it is infinite, $T = \infty$), such that \begin{enumerate}
+        \item $c_1 = q_0 w_1 \dots w_n$, where $w = w_1 \dots w_n$
+        \item For all $0 \leq j < T$, if \[c_j = x_1 \dots x_{i - 1} q x_i \dots x_n\] then the next configuration $c_{j
+            + 1}$ is the subsequent configuration, according to $\delta$, which is to say: \begin{itemize}
+                \item If $\delta \left(q, x_i\right) = \left(q', y, L\right)$ then \[
+                        c_{j + 1} = x_1 \dots x_{i - 2} q' x_{i - 1} y_i x_{i + 1} \dots x_n
+                    \]
+                \item If $\delta \left(q, x_i\right) = \left(q', y, R\right)$ then \[
+                        c_{j + 1} = x_1 \dots x_{i - 2} x_{i - 1} y_i q' x_{i + 1} \dots x_n
+                    \]
+            \end{itemize}
+    \end{enumerate}
+\end{definition}
+
+\begin{definition}[Decidable TM]
+    A Turing machine for a decision problem is a machine with final states \[
+        F = \left\{q_{\text{acc} }, q_{\text{rej} }\right\}
+    \]
+    where reaching $q_{\text{acc} }$ means the machine accepts, and reaching $q_{\text{rej} }$ means the machine
+    rejects.
+\end{definition}
+
+\begin{definition}[Language]
+    Given a deciding TM M, $L \left(M\right)$ is \[
+        L \left(M\right) = \left\{w \in \Sigma^* : M \text{accepts} w\right\}
+    \]
+\end{definition}
+% section Formal definition (end)
+
+\section{Useful procedures}\label{sec:Useful procedures} % (fold)
+\subsection{Mark with hash}\label{sub:Mark with hash} % (fold)
+Suppose we want to mark the end of the input with a special symbol $\#$. This can be useful for example when a TM uses the
+tape cells to the right of the input to store auxiliary data in its computation, and wants to separate the data from the
+input. The following TM (with the alphabet $\Sigma = \left\{a, b\right\}$) puts $\#$ at the end, and then returns to the
+beginning of the input:
+
+\begin{center}
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (q1) {$q_1$};
+        \node[state, right of=q1] (dots) {$\dots$};
+
+
+        \draw   (q0) edge[->, loop above] node{$a \to a, R \land b \to b, R$} (q0)
+                (q0) edge[->, above] node{\textvisiblespace $\to$ \# L} (q1)
+                (q1) edge[->, loop above] node{$a \to a, R \land b \to b, L$} (q1)
+                (q1) edge[->, above] node{\textvisiblespace $\to$ \textvisiblespace R} (dots)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+% subsection Mark with hash (end)
+
+\subsection{Shift right}\label{sub:Shift right} % (fold)
+This machine takes $x\#y$, and replaces it with $x\#$\textvisiblespace$y$. It operates as follows: \begin{enumerate}
+    \item Move the head to the beginning of $y$ (ie, right after the $\#$ symbol.
+    \item Replace the first symbol of y with a blank \textvisiblespace, move the head one cell to the right, and enter a
+        state that remembers the symbol that was overwritten.
+    \item In each step: \begin{enumerate}
+        \item Write the symbol remembered from the previous step
+        \end{enumerate}
+    \item When a blank symbol is encountered (indicating the end of the word), terminate in a final state.
+\end{enumerate}
+
+Let us explicitly construct the TM for $\Sigma = \left\{a, b\right\}$:
+\begin{center} % TODO
+    \begin{tikzpicture}[node distance=3cm]
+        \node[state, initial] (q0) {$q_0$};
+        \node[state, right of=q0] (qhash) {$q_\#$};
+        \node[state, right of=qhash] (qfinal) {$q_{\text{final} }$};
+        \node[state, above right of=qfinal] (qa) {$q_{a}$};
+        \node[state, below right of=qfinal] (qb) {$q_{b}$};
+
+
+        \draw   (q0) edge[loop above] node{$a \to a,\ R \land b \to b,\ R$} (q0)
+                (q0) edge[->, above] node{$\# \to \#, R$} (qhash)
+                (qhash) edge[->, above] node{\textvisiblespace $\to$ \textvisiblespace, R} (qfinal)
+                (qhash) edge[->, bend left, above left] node{a $\to$ \textvisiblespace, R} (qa)
+                (qhash) edge[->, bend right, below left] node{b $\to$ \textvisiblespace, R} (qb)
+                (qa) edge[loop above] node{$a \to a,\ R$} (qa)
+                (qb) edge[loop below] node{$b \to b,\ R$} (qb)
+                (qa) edge[->, bend right] node{$b \to a,\ R$} (qb) % TODO unclean
+                (qb) edge[->, bend right, right] node{$a \to b,\ R$} (qa)
+                (qa) edge[->, above left] node{\textvisiblespace $\to$ a, R} (qfinal)
+                (qb) edge[->, below left] node{\textvisiblespace $\to$ b, R} (qfinal)
+                ;
+    \end{tikzpicture} \\
+\end{center}
+
+% subsection Shift right (end)
+% section Useful procedures (end)
+
+
+\section{Designing Turing Machines}\label{sec:Designing Turing Machines} % (fold)
+\subsection{\texorpdfstring{$a^nb^n$}{anbn}}\label{sub:anbn} % (fold)
+Consider the language $L = \left\{a^n b^n : n \geq 0\right\}$. We shall describe the machine as follows:
+\begin{enumerate}
+    \item We will put $\#$ at the beginning, and the end, of the input
+    \item We will go to the first letter that is not a space to the right of the leftmost $\#$: If it is $\#$, we
+        accept, $b$ we reject, and $a$ we delete (replace with \textvisiblespace) and continue.
+    \item Go to the first non blank symbol before the right $\#$: If it is $\#$, we reject,  $a$ we reject, and $b$ we
+        delete and go back to step 2.
+\end{enumerate}
+
+% subsection \texorpdfstring{$a^nb^n$}{anbn} (end)
+
+\subsection{Substring}\label{sub:Substring} % (fold)
+Describe a Turing machine that decides whether a short string is a substring of a longer string. Formally, suppose the
+input is of the form $x\#y$; the machine should accept if $x$ is a substring of $y$, and reject otherwise. We will use a
+technique where we "write" $x$ above $y$, thus allowing us to compare the two in parallel. We will define the tape
+alphabet to include pairs of symbols stacked vertically: \[
+    \Gamma = \Sigma \cup \left(\Sigma \cup \left\{\text{\textvisiblespace} \right\}\right) \times \left(\Sigma \cup
+    \left\{\text{\textvisiblespace}\right\}\right)
+\]
+The TM operates as follows: \begin{enumerate}
+    \item For each symbol $\tau$ in $y$, we will replace it with $\stackrel{\text{\textvisiblespace} }{\tau} $
+    \item Return to the beginning of $x$
+    \item For every $\sigma$ in $x$, we will delete it, enter a state that remembers it, move right until reaching some
+        cell $\stackrel{\text{\textvisiblespace} }{\tau} $ (reject on \textvisiblespace), replace it with
+        $\stackrel{\sigma}{\tau} $, return to the beginning of what remains of $x$
+    \item Move right until reaching the first cell of the form $\stackrel{\text{\textvisiblespace} }{\tau} $ (ie, the
+        ending of $x$ written above $y$)
+    \item Compare $x$ and $y$ symbol by symbol as follows: \begin{enumerate}
+        \item If the current cell is $\stackrel{\sigma}{\sigma} $, continue left
+        \item If the current cell is $\stackrel{\sigma}{\tau} $ where $\sigma \ne \tau$, move to a special mismatch
+            state, and continue left
+        \end{enumerate}
+    \item If you reach $\stackrel{\text{\textvisiblespace}}{\tau}$, while still in the match state, accept
+    \item Otherwise (i.e., if a mismatch occurred), shift the string $x$ one cell to the right using the algorithm from
+        the previous example. Be sure to keep the lower symbols (those of y) unchanged
+    \item Return to step 5, and repeat the comparison at the new position
+    \item If, when shifting $x$ to the right, you reach \textvisiblespace, reject.
+\end{enumerate}
+The runtime is $O \left(\left|x\right| \left|y\right|\right)$, since we need to perform $O \left(\left|y\right|\right)$
+comparison attempts, each taking $O \left(\left|x\right|\right)$. Additionally, the shifting takes $O
+\left(\left|x\right|\right)$, so we get an overall result of $O \left(\left|x\right| \left|y\right|\right)$.
+% subsection Substring (end)
+% section Designing Turing Machines (end)
+
+\end{document}

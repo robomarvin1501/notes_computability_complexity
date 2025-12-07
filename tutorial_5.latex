@@ -1,0 +1,349 @@
+\documentclass[a4paper]{article}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{blindtext}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+% \usepackage{stix}
+\graphicspath{ {./images/} }
+\usepackage[bottom=0.5cm, right=1.5cm, left=1.5cm, top=1.5cm]{geometry}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}[section]
+
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\p}{\ensuremath{\mathbb{P}}}
+\newcommand{\E}{\ensuremath{\mathbb{E}}}
+\newcommand{\F}{\ensuremath{\mathcal{F}}}
+\newcommand{\1}{\ensuremath{\mathbbm{1}}}
+\newcommand{\B}{\ensuremath{\mathbbm{B}}}
+
+\title{Tutorial 5}
+\author{Gidon Rosalki}
+\date{2025-04-29}
+
+
+\begin{document}
+\maketitle
+
+\section{Computability classes R, RE}\label{sec:Computability classes R, RE} % (fold)
+\subsection{Definitions}\label{sub:Definitions} % (fold)
+\begin{definition}[Language of a TM]
+    The language of a Turing Machine M is \[
+        L \left(M\right) = \left\{w \in \Sigma^* : M \text{ accepts } w \right\}
+    \]
+\end{definition}
+
+\begin{definition}[Recognises]
+    A Turing Machine M recognises $L$ if $L \left(M\right) = L$
+\end{definition}
+
+\begin{definition}[Decides]
+     A Turing Machine M decides a language L if $L(M ) = L$, and M halts on every input.
+\end{definition}
+
+Notice that if M decides L, M halts and rejects every $w \notin L$, but if M only recognizes L, M may also not halt on such
+words.
+
+\begin{definition}[RE]
+    RE is the set of all recognizable languages, that is: \[
+        RE = \left\{L : \text{There is a TM that recognizes } L\right\}
+    \]
+\end{definition}
+
+\begin{definition}[R]
+    R is the set of decidable languages, that is: \[
+        R = \left\{L : \text{There is a TM that decides } L\right\}
+    \]
+\end{definition}
+
+% subsection Definitions (end)
+
+\subsection{Time bound acceptance is decidable}\label{sub:Time bound acceptance is decidable} % (fold)
+We can use the UTM to recognise acceptance of a word by a TM. We simulate the run of M on w, and accept only if M
+accepts. Therefore, $A_{\text{TM} } = \left\{\left\langle M, w \right\rangle : M \text{ accepts } w\right\} \in RE$.
+However, we will see later that $A_{\text{TM} }$ is not decidable. However we shall show that a similar language that
+bounds the length of the run is decidable.
+
+\begin{theorem}[]
+    \[
+        L = \left\{\left\langle M, w, k \right\rangle : M \text{ accepts } w \text{ within at most } k \text{ steps} \right\}
+    \]
+    \begin{proof}[Proof ]
+        We will construct a TM T, that decides $L$. If will operate as follows on $\left\langle M, w, k \right\rangle$:
+        \begin{enumerate}
+            \item Simulate the run of M on $w$, for at most $k$ steps, by using another TM on the side that counts the
+                number of steps.
+            \item If M accepts $w$ after at most $k$ steps, T accepts, otherwise T rejects.
+        \end{enumerate}
+
+        The correctness is as follows: \begin{itemize}
+            \item By the definition of T, it accepts \textbf{if and only if} the run of M on $w$ finishes within $k$ steps, so it
+                recognises $L$
+            \item T halts on all inputs, since it simulates the run for a finite number of steps ($k$), and stops
+                afterwards, so therefore it does not enter an infinite loop, and therefore decides $L$.
+        \end{itemize}
+    \end{proof}
+\end{theorem}
+% subsection Time bound acceptance is decidable (end)
+
+\subsection{NON-EMPTY TM is recognisable}\label{sub:NON-EMPTY TM is recognisable} % (fold)
+We will show that the language of encodings of TMs with a non empty language is recognisable (and will later show that
+it is not decidable). (As in, this is a TM that recognises machines that do not have an empty language).
+\begin{theorem}[]
+    \[
+        NON-EMPTY_{TM} = \left\{\left\langle M \right\rangle : L \left(M\right) \ne \emptyset\right\} \in RE
+    \]
+    \begin{proof}[Proof ]
+        We will create a TM T as follows: \\
+        For every $n \geq 0$: \\
+        For every $w \in \Sigma^* : \left|w\right| \leq n$: \\
+        Run M on $w$ for at most $n$ steps, and if M accepts $w$, then accept. \\
+
+        Correctness: We will prove this through two way containment. If $\left\langle M \right\rangle \in L
+        \left(T\right)$, then by the construction, there exists $w \in \Sigma^*$ such that M accepts, so $\left\langle M
+        \right\rangle \in NON-EMPTY_{TM}$. \\
+        If $\left\langle M \right\rangle \in NON-EMPTY_{TM}$, then there exists a word $w$ that M accepts. We will
+        denote by $k \in \N$ the length of the run of M on $w$. By the construction, the $i = \displaystyle\max_{}
+        \left\{\left|w\right|, k\right\} $th iteration, T will simulate the run of M on $w$, (because $\left|w\right|
+        \leq i$), for at least $k$ steps (since $k \leq i$), and hence M will reach an accepting state, and so T will
+        accept.
+    \end{proof}
+
+\end{theorem}
+% subsection NON-EMPTY TM is recognisable (end)
+
+\subsection{Closure properties of R, and RE}\label{sec:Closure properties of R, and RE} % (fold)
+\subsubsection{R}\label{sec:R} % (fold)
+\begin{theorem}[]
+    \[
+        L \in R \implies \overline{L} \in R\ \left(L \cup \overline{L} = \Sigma^*\right)
+    \]
+    \begin{proof}[Proof ]
+        Construction: Since $L \in R$, there exists a TM M that decides $L$. We will use M to construct a new machine T,
+        that decides $\overline{L}$. This is done by swapping the two states $q_{\text{acc} }$ and $q_{\text{rej} }$. \\
+
+        Correctness: First we will note that since M stops on all inputs, the machine T also stops on all inputs, as
+        their only differences is the name of the final states. $L \left(T\right) = \overline{L}$, since \[
+            T \text{ accepts } w \Leftrightarrow M \text{ rejects } w \Leftrightarrow w \notin L \Leftrightarrow w \in \overline{L}
+        \]
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[R is closed to union]
+    \[
+        L_1, L_2 \in R \implies L_1 \cup L_2 \in R
+    \]
+
+    \begin{proof}[Proof ]
+        Construction: We will create a TM T that operates as follows: Given $w \in \Sigma^*$: \begin{enumerate}
+            \item We will run $M_1$ that decides $L_1$ on $w$, and if it accepts, T will also accept
+            \item We will run $M_2$ that decides $L_2$ on $w$, and if it accepts, T will also accept
+            \item Otherwise, T rejects.
+        \end{enumerate}
+
+        Remark: To accomplish this, T can duplicate the word $w$ to a more distant location on the tape and mark it with a
+        special symbol. Whenever $M_1$’s computation reaches this symbol, T uses a procedure to move $w$ even further along
+        the tape. Upon $M_1$’s termination, if acceptance does not occur, T clears the tape used by $M_1$, and repositions the
+        head to the beginning of the duplicated copy of $w$ and initiates the computation of $M_2$.
+
+        Correctness: Since $M_1$ and $M_2$ halt on all inputs, so does T. From the construction of T, it is clear that T
+        accepts a word \textbf{if and only if} $M_1$ accepts the word, or $M_2$ accepts the word, and so $L
+        \left(T\right) = L_1 \cup L_2$
+    \end{proof}
+\end{theorem}
+
+\begin{theorem}[R is closed to intersection]
+    \[
+        L_1, L_2 \in R \implies L_1 \cap L_2 \in R
+    \]
+
+    \begin{proof}[Proof ]
+        We can show it by a constructing a Turing machine that operates like the machine used in Theorem 4, with the
+        difference that it accepts \textbf{if and only if} both machines accept. \\
+
+        Remark: It also follows from closure, to complement and union since: $L_1 \cap L_2 = \overline{\overline{L_1}
+        \cup \overline{L_2}}$
+    \end{proof}
+\end{theorem}
+% subsubsection R (end)
+
+\subsubsection{RE}\label{sec:RE} % (fold)
+When dealing with the closure properties of RE, we are dealing with TMs that may not halt.
+
+\begin{theorem}[]
+    \[
+        L_1, L_2 \in R \implies L_1 \cap L_2 \in R
+    \]
+
+    \begin{proof}[Proof ]
+        We will use the same construct as we used as we used to show intersection over R, since if one of the machines
+        does not halt, then T does not halt, which is the desired behaviour. The word is then not accepted by the non
+        halting machine, and hence is not in the intersection.
+    \end{proof}
+\end{theorem}
+
+
+\begin{theorem}[]
+    \[
+        L_1, L_2 \in R \implies L_1 \cup L_2 \in R
+    \]
+
+    \begin{proof}[Proof ]
+        We may not simply use the same construct, since if $M_1$ does not halt, but $M_2$ would have halted, then $M_1$
+        will make it appear as though the word is rejected by T. We shall instead attempt to run both machines "in
+        parallel". \\
+
+        Construction: Let there be $M_1, M_2$ machines that recognise $L_1, L_2$ respectively. We will define T that
+        recognises $L_1 \cup L_2$ as follows: \begin{enumerate}
+            \item For every $n \geq 0$: \begin{enumerate}
+                \item Run $M_1$ on $w$ for $n$ steps, and if $M_1$ accepts, then accept
+                \item Run $M_2$ on $w$ for $n$ steps, and if $M_2$ accepts, then accept
+            \end{enumerate}
+        \end{enumerate}
+
+        Correctness: % TODO
+    \end{proof}
+\end{theorem}
+% subsubsection RE (end)
+
+% subsection Closure properties of R, and RE (end)
+
+
+% section Computability classes R, RE (end)
+
+\section{Reductions}\label{sec:Reductions} % (fold)
+
+\begin{definition}[Output of a TM]
+    If a TM M halts on an input $w$, then we will define $M \left(w\right)$ to be what is left on the tape at the end of
+    the run (neglecting spaces).
+\end{definition}
+
+\begin{definition}[Computable]
+    A function $f: \Sigma^* \to \Sigma^*$ is called \textbf{computable} if there exists an TM $M_f$ such that for every
+    $w \in \Sigma^*$, it holds that $M_f \left(w\right) = f \left(w\right)$
+\end{definition}
+
+\begin{definition}[Reduction]
+    A \textbf{reduction} from a language $A \subseteq \Sigma^*$ to the language $B \subseteq \Sigma^*$ is a computable
+    function $f: \Sigma^* \to \Sigma^*$, such that for all $x \in \Sigma^*$, \[
+        x \in A \Leftrightarrow f \left(x\right) \in B
+    \]
+    If such a function exists, then we denote $a \leq_m B$. A TM that computes $f$ is called a \textbf{reduction
+    machine}.
+\end{definition}
+
+\subsection{Example: Parity languages}\label{sub:Example: Parity languages} % (fold)
+Consider the following languages over $\Sigma = \left\{a, b\right\}$: \begin{align*}
+    L_1 = \left\{w \in \Sigma^* : 2 \mid \left|w\right|\right\} \left(\text{Even length strings} \right)
+    L_2 = \left\{w \in \Sigma^* : 2 \nmid \left|w\right|\right\} \left(\text{Odd length strings} \right)
+\end{align*}
+
+We shall claim that $L_1 \leq_m L_2$:
+\subsubsection{Reduction 1: solve the problem}\label{sec:Reduction 1: solve the problem} % (fold)
+We can define $f: \Sigma^* \to \Sigma^*$ as follows: \[
+    f \left(w\right) = \begin{cases}
+        a, &\text{ if }\left|w\right| \mod 2 = 0\\
+        aa, &\text{ if }\left|w\right| \mod 2 = 1\\
+    \end{cases}
+\]
+$f$ is a computable function, so we can determine the length of a word using a TM, and determine if it is even or odd.
+We shall now prove that $x \in L_1 \Leftrightarrow f \left(x\right) \in L_2$ holds: % TODO
+% subsubsection Reduction 1: solve the problem (end)
+
+\subsubsection{Reduction 2: transfer the problem}\label{sec:Reduction 2: transfer the problem} % (fold)
+% TODO
+% subsubsection Reduction 2: transfer the problem (end)
+% subsection Example: Parity languages (end)
+
+\subsection{NON-EMPTY TM}\label{sub:NON-EMPTY TM} % (fold)
+\begin{theorem}[]
+    \[
+        HALT_{TM} \leq_m NON-EMPTY_{TM}
+    \]
+    \begin{proof}[Proof ]
+        How to approach these reduction problems? Ask yourself the following: \begin{enumerate}
+            \item \textbf{What should we construct?} That one is easy - it is always a computable function: $f: \Sigma^* \to
+                \Sigma^*$
+            \item \textbf{What is the type of the input and output of $f$?} Naturally, the input and the output can be any word,
+                but since handling invalid inputs is usually an easy task, we will focus on “valid” inputs. In our case,
+                $f$ takes an encoding of a TM, and a word, $\left\langle M, w \right\rangle$, as input and outputs an
+                encoding of a TM $\left\langle T_{M, w} \right\rangle$
+            \item \textbf{What condition should $f$ satisfy?} By the definition of reduction and the definitions of the languages,
+                M halts on $w$ \textbf{if and only if} the language of T is not empty.
+        \end{enumerate}
+        Once we understand what to construct, we focus on how to construct such a function: \\
+        It is tempting here to use a function \[
+            f \left(\left\langle M, w \right\rangle\right) = \begin{cases}
+                \left\langle M_{ALL} \right\rangle, &\text{ if }M \text{ halts on } w\\
+                \left\langle M_{EMPTY} \right\rangle, &\text{ otherwise }\\
+            \end{cases}
+        \]
+        but this is impossible, thanks to the proof of the halting problem, so don't do that! \\
+        To show that $f$ is a reduction, we should show that it is computable, namely that there exists a TM $M_f$ that
+        computes $f$. In our example, $M_f$ cannot check if $M$ halts on $w$, so we should probably encode $M$ and $w$
+        inside $T_{M, w} \stackrel{def}{=} f \left(\left\langle M, w \right\rangle\right)$, so as part of its run on an
+        input $x$, it can simulate the run of $M$ on $w$. The intuition is that if $M$ does not halt on $w$, then $T$
+        should not accept, no matter what is its input $x$. If $M$ does halt on $w$, then $T$ should accept some input,
+        and for simplicity we can design it to accept every input $x$. \\
+
+        Construction: Let $f: \Sigma^* \to \Sigma^*$ be the function that returns $\varepsilon$ for an "invalid" input
+        (that is, an input that is not an encoding of a TM, and a word), and for a valid input returns \[
+            f \left(\left\langle M, w \right\rangle\right) = \left\langle T_{M, w} \right\rangle
+        \]
+        where $T_{M, w}$ operates as follows on an input $x$: \begin{enumerate}
+            \item Delete $x$ from the tape
+            \item Write $w$ on the tape
+            \item Run $M$ on $w$ as a procedure
+            \item If $M$ reaches a final state, (may it be accept, or reject), then accept
+        \end{enumerate}
+
+        Computability: $f$ is computable for the following reasons: \begin{enumerate}
+            \item Checking the validity of the input (whether or not it is an encoding of a TM, and a word) is
+                computable
+            \item Given a TM $M$ and a word $w$ constructing such a TM is computable by “combining” a TM that deletes
+                its input, a TM that writes $w$ on its tape, and $M$.
+        \end{enumerate}
+
+        Correctness: For invalid invalid input (that which is not in $HALT_{TM}$), the reduction returns an invalid
+        input, (that which is not in $NON-EMPTY_{TM}$). For a valid input: \begin{enumerate}
+            \item If % TODO
+        \end{enumerate}
+    \end{proof}
+\end{theorem}
+% subsection NON-EMPTY TM (end)
+
+\subsection{Reduction theorem}\label{sub:Reduction theorem} % (fold)
+\begin{theorem}[Reduction theorem]
+    Let $L_1, L_2 \subseteq \Sigma^*$, such that $L_1 \leq_m L_2$. Then $L_2 \in R \implies L_1 \in R$, and equivalently
+    $L_1 \notin R \implies L_2 \notin R$. Similarly, $L_2 \in RE \implies L_1 \in RE$, and equivalently $L_1 \notin RE
+    \implies L_2 \notin RE$.
+\end{theorem}
+
+Intuition: Since $L_1 \leq_m L_2$, then any task in $L_2$ is at least as difficult to carry out as the task in $L_1$. If
+there is something that we know how to do with $L_2$, be that deciding, recognising, or recognising its complement, then
+we can do the same for $L_1$ by first applying the reduction to $L_2$. Equivalently, if there is something we know to be
+impossible with $L_1$, then the same applies to $L_2$.
+
+Example: By Theorem 8, we saw that $HALT_{TM} \leq_m NON-EMPTY_{TM}$, and we saw in the lecture that $HALT_{TM} \notin
+R$, so by the reduction theorem, it also holds that $NON-EMPTY_{TM} \notin R$.
+% subsection Reduction theorem (end)
+% section Reductions (end)
+
+\end{document}

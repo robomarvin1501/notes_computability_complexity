@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -133,9 +133,9 @@ the empty sequence. \\
 
 So, given those definitions, \begin{itemize}
     \item $L_1 = \left\{ab, a, \varepsilon, bbb\right\}$ is a finite language
-    \item $L_2 = \left\{w \in \Sigma^* : w starts with a\right\}$ is an infinite
+    \item $L_2 = \left\{w \in \Sigma^* : w \text{ starts with } a\right\}$ is an infinite
         language
-    \item $L_3 = ssbrw \in \Sigma^* : |w| < 24$ is a finite language
+    \item $L_3 = \left\{w \in \Sigma^* : |w| < 24\right\}$ is a finite language
 \end{itemize}
 % subsection Languages (end)
 \subsection{DFA}\label{sub:DFA} % (fold)
